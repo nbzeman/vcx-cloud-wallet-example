@@ -1,0 +1,19 @@
+{
+  "attrs": [
+    {
+      "name": "FirstName",
+      "p_type":"=",
+      "p_value":"*",
+       "restrictions":[{"issuer_did": "4FRSsmC7gni9RC44Br39YH"}]
+    },
+    {
+      "name": "LastName",
+      "p_type":"=",
+      "p_value":"*",
+      "restrictions":[{"issuer_did": "4FRSsmC7gni9RC44Br39YH"}]
+    }
+  ],
+  "sourceId":"999999",
+  "name": "Proof",
+  "revocationInterval": {}
+}

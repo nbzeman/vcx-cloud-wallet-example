@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Build Credential</title>
+    <link href = "vcxweb.css" rel = "stylesheet">
+    <script src="socket.io.js"></script>
+    <script src = "vcx-client.js" charset="utf-8"></script>
+</head>
+<body>
+  <div id="mainx" align="center">
+  <h1>Verity 1.0 Panel</h1>
+  <button type="button" onclick="buildCred()" >Click to Build Selected Credential Below </button>
+  <br>
+  <br>
+  <div id="loader" class="loader"></div>
+  <label>Select Credential to Build</label>
+  <select id="build_cred">
+  </select>
+  <br>
+  <br>
+  <p id="message">Interactive Messages will appear here.</p>
+</div>
+</body>
+</html>

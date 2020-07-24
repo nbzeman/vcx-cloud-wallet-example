@@ -1,0 +1,30 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Structured Message</title>
+    <link href = "vcxweb.css" rel = "stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.2.0/socket.io.slim.js"></script>
+    <script src = "vcx-client.js" charset="utf-8"></script>
+</head>
+<body>
+<div id="main" align="center">
+  <h1>Verity 1.0 Messenger</h1>
+  <a  href="index.html">Home</a>
+  <br>  
+  <textarea id="qtext" rows ="2" cols="80">enter question text here...</textarea>
+  <br>
+  <br>
+  <button style="width:320px;height:60px;" onclick="askQuestion()" >Connect and Send</button>
+  <div class="loader"></div>
+  <div id="imgdiv">
+    <img id="qr" align="middle"/>
+  </div> 
+  <br>
+  <br><br>
+  <div id="message">Interactive messages will appear here.</div>
+  <br>
+
+</div>
+</body>
+</html>

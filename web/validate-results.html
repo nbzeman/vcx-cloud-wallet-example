@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Covid 19 Validator</title>
+    <link href = "vcxweb.css" rel = "stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.2.0/socket.io.slim.js"></script>
+    <script src = "vcx-client.js" charset="utf-8"></script>
+</head>
+<body>
+<div id="mainx" align="center">
+  <img src="https://static.pps.evernym.com/logos/evernymBarbell_new2.png" height="64px"/>
+  <h1>Covid-19 Results Validator</h1>
+  <a href="index.html">Home</a>
+  After clicking the button below, you will be presented with a QR to scan using your <a class="default" href="https://connect.me/">Validator Mobile App</a>. Once you scan this, a Proof Request will be sent to your device requesting your Covid-19 Antibody Credential. If you do not have this, please visit your Issuing Agency and request it.
+  <br>
+  <!-- <div class="selection">
+    <label>Select Credential to Prove &nbsp;</label>
+    <select id="proof_cred">
+
+    </select>
+  </div>
+  <br>
+  <div class="selection">
+    <label>Select Credential to Give &nbsp;</label>
+    <select id="give_cred">
+
+    </select>
+  </div> -->
+  <br>
+  <div id="imgdiv">
+    <img id="qr" align="middle"/>
+  </div> 
+  <br>
+  <button onclick="proof_credential('covid-19-lab','covid-w3c')" >Validate Results Through QR</button>
+  <br><br>
+  <div class="validator" id="results">Covid-19 Antibodies Indicator</div>
+  <div id="message"></div>
+  <br>
+
+</div>
+</body>
+</html>

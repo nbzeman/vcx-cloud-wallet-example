@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Credential Exchange</title>
+    <link href = "vcxweb.css" rel = "stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.2.0/socket.io.slim.js"></script>
+    <script src = "vcx-client.js" charset="utf-8"></script>
+</head>
+<body>
+<div id="mainx" align="center">
+  <h1>Verity 1.0 Credential Exchange</h1>
+  <a href="index.html">Home</a>
+  <br>
+  <div class="selection">
+    <label>Select Credential to Prove &nbsp;</label>
+    <select id="proof_cred">
+
+    </select>
+  </div>
+  <br>
+  <div class="selection">
+    <label>Select Credential to Give &nbsp;</label>
+    <select id="give_cred">
+
+    </select>
+  </div>
+  <br>
+  <div id="imgdiv">
+    <img id="qr" align="middle"/>
+  </div>
+  <br>
+  <button onclick="proof_credential()" >Credential Exchange Through QR</button>
+  <br><br>
+  <div id="message">Interactive messages will appear here.</div>
+  <br>
+
+</div>
+</body>
+</html>

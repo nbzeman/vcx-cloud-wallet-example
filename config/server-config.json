@@ -1,0 +1,4 @@
+{
+  "enterprise-server-endpoint":"localhost:8080",
+  "cloud-wallet-endpoint":"localhost:8081"
+}

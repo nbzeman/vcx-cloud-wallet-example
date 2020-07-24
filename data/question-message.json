@@ -1,0 +1,13 @@
+{
+      "@type": "did:sov:BzCbsNYhMrjHiqZDTUASHg;spec/committedanswer/1.0/question",
+      "@id": "518be002-de8e-456e-b3d5-8fe472477a86",
+      "question_text": "Test Question",
+      "question_detail": "Are you There?",
+      "valid_responses": [
+        { "text": "ACCEPT", "nonce": "YES" },
+        { "text": "REJECT", "nonce": "NO" }
+      ],
+      "@timing": {
+        "expires_time": "null"
+      }
+    }

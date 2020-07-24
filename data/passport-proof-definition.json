@@ -1,0 +1,21 @@
+{
+  "attrs": [
+    {
+       "name": "Passport Expiration",
+       "self_attest_allowed":false,
+       "restrictions":[
+        {}
+      ]
+    },
+    {
+      "name": "Country of Origin",
+      "self_attest_allowed":false,
+      "restrictions":[
+        {}
+      ]
+    }
+  ],
+  "sourceId":"333333",
+  "name": "Proof",
+  "revocationInterval": {}
+}

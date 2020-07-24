@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Store Connection</title>
+    <link href = "vcxweb.css" rel = "stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.2.0/socket.io.slim.js"></script>
+    <script src = "vcx-client.js" charset="utf-8"></script>
+</head>
+<body>
+<div id="main" align="center">
+  <h1>Store Connection</h1>
+  <a  href="index.html">Home</a>
+  <br>
+  <div id="loader" class="loader"></div>
+  <div id="imgdiv">
+    <img id="qr" align="middle"/>
+  </div> 
+  <br>
+  <label>Enter User Name</label>&nbsp;&nbsp;
+  <input class="text_input" type="text" id="connection_name">
+  <br><br>
+  <button onclick="make_connection()" >Click for Connection Request QR</button>
+  <br><br>
+  <div id="message">Interactive messages will appear here.</div>
+  <br>
+
+</div>
+</body>
+</html>

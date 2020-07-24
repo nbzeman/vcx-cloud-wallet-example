@@ -1,0 +1,17 @@
+version: '3'
+
+services:
+  app:
+    restart: unless-stopped
+    container_name: vcx_app
+    hostname: app
+    restart: always
+    image: enymacr.azurecr.io/customer-toolkit:latest
+    ports:
+      - "80:80"
+    env_file:
+      - env.dev
+    networks:
+      - vcx-network
+networks:
+  vcx-network:

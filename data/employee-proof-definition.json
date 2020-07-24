@@ -1,0 +1,17 @@
+{
+  "attrs": [
+    {
+      "name": "FirstName",
+      "self_attest_allowed":false,
+       "restrictions":[{}]
+    },
+    {
+      "name": "LastName",
+      "self_attest_allowed":false,
+      "restrictions":[{}]
+    }
+  ],
+  "sourceId":"999999",
+  "name": "Proof",
+  "revocationInterval": {}
+}

@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <link href = "vcxweb.css" rel = "stylesheet">
+    <script src="socket.io.js"></script>
+    <script src = "vcx-client.js" charset="utf-8"></script>
+</head>
+<body>
+  <main align="center">
+  <h2>Verity 1.0 Create Custom Credential</h2>
+  <a href="index.html">Home</a>
+
+  <label>Create Schema and Credential Definition, using the Template below. The Schema and Credential Definition will be created and written to the Ledger, as well as sample credential data and a templated Proof Definition.</label>
+  <br>
+  <textarea rows="24" cols="104" id="schema">{
+
+      "data":
+
+      {
+        "attrNames":
+
+        [
+          "Name",
+          "Country Of Origin",
+          "Date Of Birth",
+          "Date Of Issue"
+        ],
+
+          "version":"111.11",
+          "name":"<INSERT CREDENTIAL NAME>"
+      },
+        "sourceId":"<IDVALUE>",
+        "paymentHandle":0
+
+  }
+  </textarea>
+  <br>
+  <div id="loader" class="loader"></div>
+  <br>
+  <label>Schema ID : </label>
+  <label id="schema_id"></label>
+  <br>
+  <label>Credential Definition ID : </label>
+  <label id="cred_id"></label>
+  <br><br>
+  <button onclick="makeCred()">Make Credential</button>
+  <br>
+  <p id="message">Interactive Messages will appear here.</p>
+
+</main>
+</body>
+</html>

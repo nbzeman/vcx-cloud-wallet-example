@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <link href = "vcxweb.css" rel = "stylesheet">
+    <script src="socket.io.js"></script>
+    <script src = "vcx-client.js" charset="utf-8"></script>
+</head>
+<body>
+  <h1>Welcome to the VCX Sample Web App</h1>
+  <h2>Generate A Proof Request</h2>
+  <a href="index.html">Home</a>
+  <br>
+  <h1>Create a Proof Request and specify restrictions.</h1>
+  <br>
+  <br>
+  <h2>Enter Proof Template Name</h2>
+  <input style="text-align: center;width:50%;background-color:rgb(250, 248, 248)" type="text" id="proof-name">
+  <hr>
+  <div id="parent-div">
+    <div class="attr" id="attr_0">
+        <details>
+          <summary><b> Proof Attribute Parameters </b></summary>
+            <br>
+            <label>Attribute Name</label>
+            <input name="name" id="attr_000_name" type="text">
+            <label>Issuer DID Restriction</label>
+            <input name="Issuer" id="attr_000_issuer" type="text">
+            <label>Schema Name Restriction</label>
+            <input id="attr_000_schema_name" type="text">
+            <label>Schema Version Restriction</label>
+            <input id="attr_000_schema_version" type="text">
+            <label>Schema Issuer DID Restriction</label>
+            <input id="attr_000_schema_issuer_did" type="text">
+            <label>Credential Definition ID Restriction</label>
+            <input id="attr_000_cred_def_id" type="text">
+        </details>
+    </div>
+  </div>
+  <br>
+  <button class="btn-proof" onclick="addProofAttr()" >+ Add Attribute to Proof</button>
+  <div class="loader"></div>
+  <hr>
+  <button class="btn-proof" onclick="makeComplexProof()">Create Proof Template</button>
+</body>
+</html>

@@ -1,0 +1,57 @@
+{
+  "attrs": [
+    {
+      "name": "name",
+      "self_attest_allowed":false,
+       "restrictions":[{"issuer_did":"6oq4SRQF7rSQ4zvtQX2ixi"}]
+    },
+    {
+      "name": "issuer.location.@type",
+      "self_attest_allowed":false,
+      "restrictions":[{"issuer_did":"6oq4SRQF7rSQ4zvtQX2ixi"}]
+    },
+    {
+      "name": "issuer.location.name",
+      "self_attest_allowed":false,
+      "restrictions":[{"issuer_did":"6oq4SRQF7rSQ4zvtQX2ixi"}]
+    },
+    {
+      "name": "issuer.location.url",
+      "self_attest_allowed":false,
+      "restrictions":[{"issuer_did":"6oq4SRQF7rSQ4zvtQX2ixi"}]
+    },
+    {
+      "name": "issuanceDate",
+      "self_attest_allowed":false,
+      "restrictions":[{"issuer_did":"6oq4SRQF7rSQ4zvtQX2ixi"}]
+    },
+    {
+      "name": "credentialSubject.id",
+      "self_attest_allowed":false,
+      "restrictions":[{"issuer_did":"6oq4SRQF7rSQ4zvtQX2ixi"}]
+    },
+    {
+      "name": "credentialSubject.type",
+      "self_attest_allowed":false,
+      "restrictions":[{"issuer_did":"6oq4SRQF7rSQ4zvtQX2ixi"}]
+    },
+    {
+      "name": "credentialSubject.catalogNumber",
+      "self_attest_allowed":false,
+      "restrictions":[{"issuer_did":"6oq4SRQF7rSQ4zvtQX2ixi"}]
+    },
+    {
+      "name": "credentialSubject.ifu",
+      "self_attest_allowed":false,
+      "restrictions":[{"issuer_did":"6oq4SRQF7rSQ4zvtQX2ixi"}]
+    },
+    {
+      "name": "credentialSubject.assay",
+      "self_attest_allowed":false,
+      "restrictions":[{"issuer_did":"6oq4SRQF7rSQ4zvtQX2ixi"}]
+    }
+  ],
+  "sourceId":"999999",
+  "name": "Hireright Covid 19 Results Request",
+  "revocationInterval": {}
+}
