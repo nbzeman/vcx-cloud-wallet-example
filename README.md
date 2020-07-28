@@ -1,6 +1,4 @@
-All Rights Reserved
-
-# Toolikt
+# Evernym Customer Toolit
 
 This codebase is the VCX Server and Client Web App, based on Libvcx/Libindy 1.12.0 and the associated NodeJS/Python wrappers. 
 
