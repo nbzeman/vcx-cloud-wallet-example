@@ -182,7 +182,6 @@ app.post(`/api/v1/receive_proof_request`, async function(req,res){
 
 })
 
-
 // Enterprise Offer Credentials
 
 app.post(`/api/v1/offer_credentials`, async function(req,res){

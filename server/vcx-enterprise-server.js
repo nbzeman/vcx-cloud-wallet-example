@@ -189,9 +189,7 @@ app.post(`/api/v1/receive_proof_request`, async function(req,res){
 
 })
 
-
 // Enterprise Offer Credentials
-
 app.post(`/api/v1/offer_credentials`, async function(req,res){
   console.log(req.body);
   let cred_name = req.body['credential'];
@@ -225,7 +223,6 @@ app.post(`/api/v1/offer_credentials`, async function(req,res){
 })
 
 // Enterprise Receive Credentials
-
 app.post(`/api/v1/receive_credentials`, async function(req,res){
      //get details
      console.log("ACCEPTING REQUEST...");
@@ -254,7 +251,6 @@ app.post(`/api/v1/receive_credentials`, async function(req,res){
          console.log("Credential Offers Below:");
          console.log(JSON.stringify(offers[0]));
          io.emit('recipient_news',{connection: JSON.stringify(offers[0])});
-
      }
      let credential = await Credential.create({ sourceId: 'enterprise', offer: JSON.stringify(offers[0]), connection: connection});
      await credential.sendRequest({ connection: connection, payment: 0});
@@ -297,7 +293,6 @@ function ExpireAll(){
   }
 }
 setTimeout(ExpireAll,500000);
-
 // polling killer
 let killTime = 300000;
 let killPolling = false;
@@ -310,7 +305,6 @@ let timeUp = function(x){
         killPolling = false;
     }
 }
-
 //sleep function
 function sleep(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));
