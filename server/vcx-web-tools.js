@@ -30,8 +30,8 @@ run();
 // global vars
 let config = "../config/vcx-config.json";
 
-async function connectWithInvitation(details){
-  let connection = await Connection.createWithInvite({"id":'1',"invite": details});
+async function connectWithInvitation(id, details){
+  let connection = await Connection.createWithInvite({"id":id,"invite": details});
   return connection;
 }
 async function serializedConnection(connection){

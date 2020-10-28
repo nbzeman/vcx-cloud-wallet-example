@@ -3,6 +3,7 @@
 // Works as an automated cloud version of Connect.Me, using a REST API as a message transport to prompt the Credential Exchange
 
 // imports
+const axios = require('axios');
 var request = require('request');
 var cors = require('cors');
 var qr = require('qr-image');
@@ -51,8 +52,31 @@ app.use(express.urlencoded());
 // express set up Cross Origin
 app.use(cors());
 
+//simple GET to test and retrieve directory info from Data
+app.get(`/api/v1/file_list`,async function(req,res){
+    let pfilter = req.body['filter'];
+    let filter="schema.json";
+    console.log(pfilter);
+    const directoryPath = `../data/`;
+    let file_list = [];
+    await fs.readdir(directoryPath, function (err, files) {
+        //handling error
+        if (err) {
+            return console.log('Unable to scan directory: ' + err);
+        }
+        files.forEach(function (file) {
+            // Do whatever you want to do with the file
+            if(file.includes("schema")){
+              console.log(file);
+              file=file.replace('-schema.json','');
+              file_list.push(file);
+            }
+        });
+        res.send(file_list);
+    });
+  })
 // Enterprise issue proof request
-app.post(`/api/v1/issue_proof_request`, async function(req,res){
+app.post(`/api/v1/request_proof`, async function(req,res){
     // receive body of request
     console.log(req.body);
     let cred_name = req.body['credential'];
@@ -102,6 +126,7 @@ app.post(`/api/v1/issue_proof_request`, async function(req,res){
 
 // Enterprise Receive Proof Request
 app.post(`/api/v1/receive_proof_request`, async function(req,res){
+    console.log(req.body);
     let inviteDetails = JSON.stringify(req.body);
     let invitee = req.body['s']['n'];
     io.emit('recipient_news',{connection:`${invitee} has requested a Connection with you`});
@@ -190,22 +215,23 @@ app.post(`/api/v1/offer_credentials`, async function(req,res){
   let endpoint = req.body['endpoint'];
   let connection = await vcxwebtools.makeConnection('QR','enterprise_connection','000');
   let details = await connection.inviteDetails(true);
+  console.log(details);
+  console.log(endpoint);
   // send connection request to endpoint via request
-  request.post({
-    // headers
-    headers: {'content-type' : 'application/json'},
-    // REST API endpoint
+//   axios.post(
+//       `${endpoint}/api/v1/receive_credentials`,
+//       details
+//   ).then(function (response) {
+//     console.log(response);
+//   })
+  axios({
+    method: 'post',
     url: `${endpoint}/api/v1/receive_credentials`,
-    // JSON body data
-    body : details
-    },
-    // callback
-    function (error, response, body) {
-        if (!error && response.statusCode == 200) {
-            //console.log(body);
-        }
+    data:details,
+    headers: {
+        'Content-Type': 'application/json'
     }
-  );
+  });
   // Poll for successful Connection
   let state = await connection.getState();
   while(state != StateType.Accepted) {
@@ -221,14 +247,14 @@ app.post(`/api/v1/offer_credentials`, async function(req,res){
 app.post(`/api/v1/receive_credentials`, async function(req,res){
      //get details
      console.log("ACCEPTING REQUEST...");
+     console.log(req.body);
      let inviter = req.body['s']['n'];
      let inviteDetails = JSON.stringify(req.body);
      console.log(inviteDetails);
      //io.emit('recipient_news',{connection:`Connection Requested has been sent by ${inviter}`});
-
-     let connection = await vcxwebtools.connectWithInvitation('1', inviteDetails);
+     let connection = await vcxwebtools.connectWithInvitation(inviter, inviteDetails);
      // build connection
-     await connection.connect({id:"1"});
+     await connection.connect({id:inviter});
      console.log('Connection Invite Accepted');
      await connection.updateState();
      let state = await connection.getState();
@@ -239,14 +265,12 @@ app.post(`/api/v1/receive_credentials`, async function(req,res){
          console.log(state);
      }
      io.emit('recipient_news',{connection:`Credential offers from ${inviter} are :`});
-
      let offers = await Credential.getOffers(connection);
      while(offers.length < 1){
          offers = await Credential.getOffers(connection);
          console.log("Credential Offers Below:");
          console.log(JSON.stringify(offers[0]));
          io.emit('recipient_news',{connection: JSON.stringify(offers[0])});
-
      }
      let credential = await Credential.create({ sourceId: 'enterprise', offer: JSON.stringify(offers[0]), connection: connection});
      await credential.sendRequest({ connection: connection, payment: 0});
@@ -261,7 +285,6 @@ app.post(`/api/v1/receive_credentials`, async function(req,res){
      console.log(serial_cred);
      //await fs.writeJSON(`./data/received-credential.json`,serial_cred);
      //io.emit('recipient_news',{connection:`Credential Accepted`});
-
 })
 
 // Generate schema and credential definition based upon json file in ./data/cred_name-schema.json

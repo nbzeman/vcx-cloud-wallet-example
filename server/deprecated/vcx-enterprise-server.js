@@ -12,7 +12,7 @@ var fs = require('fs-extra');
 var express = require('express');
 var session = require('express-session');
 const bodyParser = require('body-parser');
-var vcxwebtools = require('./vcx-web-tools.js');
+var vcxwebtools = require('../vcx-web-tools.js');
 let complete = false;
 // set up app express server
 const INSTALL_DIR = '/opt/village';

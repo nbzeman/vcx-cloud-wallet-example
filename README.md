@@ -8,7 +8,7 @@ config/env.dev has the following parameters for provisioning and installing the 
 
 1. GEN_TXN_PATH=/root/config/genesis.txn
 2. AGENCY_URL=https://eas01.pps.evernym.com
-3. INSTITUTION_NAME=Verity Server 1.0
+3. INSTITUTION_NAME=Verity Cloud Wallet 1.0
 4. INSTITUTION_LOGO=https://s3.us-east-2.amazonaws.com/static.evernym.com/images/icons/cropped-Evernym_favicon-trans-192x192.png
 5. ENTERPRISE_SEED=ait5arie2uwoog5quoucheeV4die0eed **An Empty ENTERPRISE_SEED will trigger build script to auto-generate a random seed**
 6. GENESIS_FILE_URL="https://raw.githubusercontent.com/sovrin-foundation/sovrin/stable/sovrin/pool_transactions_sandbox_genesis"
