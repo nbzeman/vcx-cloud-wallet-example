@@ -264,41 +264,6 @@ function validate_proof(proof) {
   xhttp.send(JSON.stringify(body));
 }
 
-function offer_credential(cred) {
-  let api_path = `/api/v1/offer_credential`;
-  let qrimage = document.getElementById('qr');
-  if(cred == null){
-    cred = document.getElementById("give_cred").value;
-  }else{
-    console.log('using arg cred and not chosen cred')
-  }
-  let body = {
-    "type":"qr",
-    "give_cred":cred
-  };
-  let base64str = "";
-  let xhttp = new XMLHttpRequest();
-  xhttp.onreadystatechange = function() {
-      if (this.readyState == 4) {
-          // Process response here
-          console.log("RESPONSE");
-          let raw = "";
-          for (let i=0; i<=this.responseText.length-1; i++){
-              raw += String.fromCharCode(this.responseText.charCodeAt(i) & 0xff);
-          }
-          base64str = btoa(raw);
-          let converted_qr = `data:image/png;base64,${base64str}`;
-          qrimage.style.visibility="visible";
-          // qrimage.classList.add("opener");
-          qrimage.style.height="300px";
-          qrimage.setAttribute('src',converted_qr);
-      }
-  }
-  xhttp.open("POST", api_path, true);
-  xhttp.setRequestHeader('Content-Type', 'application/json');
-  xhttp.overrideMimeType('text/plain; charset=x-user-defined');
-  xhttp.send(JSON.stringify(body));
-}
 
 function make_connection() {
   let api_path = `/api/v1/store_connection`;

@@ -39,6 +39,25 @@ The last several lines of the log should read:
 ```
 IF there is an error or a status of the Supervisor says EXITED, look through the logs for errors or contact your support engineer for further assistance.
 
+## Docker Compose Guide
+
+For the Cloud Wallet to work properly, there are 3 containers that will be running. The two vcx wallet apps will BOTH be using vcx-cloud-wallet as the main server, with an instance of nginx running as the reverse proxy folder. Since these two servers are identical, the API endpoints are the same for both instances, but the names and ports will differ.
+
+1. vcx-cloud-wallet - this app will run the cloud wallet and holder functions, running on port 8081. This will run on the internal Docker network with a hostname of "wallet-app". Any REST API calls to the Node Express Server can be sent from another container on this network using http://wallet-app/api/v1/<endpoint> or from the host machine at localhost:8081/api/v1/<endpoint>
+2. vcx-enterprise-server - this app runs identical code as the vcx-cloud-wallet, but is used to send the Connection invitation and the credential offer or proof requests to the vcx-cloud-wallet server through the API endpoints.
+
+## Web App Logging
+
+Logging files for output and errors can be accessed in the docker container /var/log/. Running the tail of the files will interactively log the output and errors to the console for viewing. First log into the docker container.
+
+```bash
+  docker exec -it vcx-wallet-app /bin/bash
+  tail -f /var/log/vcx*
+```
+
+## API endpoints 
+
+
 ## Remote Docker Installation
 
 1. Clone repo into VM
@@ -59,64 +78,7 @@ IF there is an error or a status of the Supervisor says EXITED, look through the
 3. Run docker-compose up --build
 4. Navigate to IP or domain of VM
 
-
-
-# Vagrant installation Instructions (This assumes you have installed VirtualBox and Vagrant on your host machine). This Web App Training Demo has only been tested on a Vagrant VM running on Mac OSX Mojave. It should run correctly on all other OSX versions, but it has not been bug tested in a Windows environment or an AWS VM yet. Adjustments will need to be made if you intend to run this on a cloud-based configuration (such as the global path of the genesis.txn file in the vcx-config.json).
-
-1. *****ONLY IF YOU ARE USING A MAC OR WINDOWS HOST MACHINE WITH VAGRANT AND VIRTUALBOX INSTALLED***** In the main directory containing the VagrantFile, Run vagrant in a terminal, with the VagrantFile and ssh into the instance
-
-```bash
-    vagrant up
-    vagrant ssh
-```
-
-2. 
-
-***MAC*** Navigate to the shared directory (/vagrant) for the VM. Run the install-wizard-mac.sh bash script to install and provision Libvcx and the Sample Web App
-
-```bash
-    cd /vagrant
-    bash install-wizard-mac.sh
-```
-***WINDOWS*** Copy the shared directory (/vagrant) to a separate directory (vcx-vagrant). Run the vcx-vagrant/install/install-wizard-win.sh bash script to install and provision Libvcx and the Sample Web App
-
-```bash
-    cp -r /vagrant vcx-vagrant
-    cd vcx-vagrant/install
-    bash install-wizard-win.sh
-```
-
-3. Hit Enter through the Prompts for default values (or choose custom values for yourself). You can customize the following values, but hitting Enter with a blank value will generate automatic and default values (suggested for non-advanced users)
-
-    * Wallet Seed - you can create a 32 bit seed and re-use it for re-installing. If you choose to use the randomly generated key is will be saved in a text file for you called "eseed.txt". When re-provisioning you should use this key value in order to prevent from having to re-register your DID. 
-    * VCX Enterprise Name (will show up on requests and credentials in Connect.Me)
-    * VCX Enterprise Logo URL (leaving this blank will generate a robot head for the icon)
-    * Enterprise Agency Server (hit Enter for the default value *highly suggested*)
-    * Genesis file (hit Enter for default value *highly suggested*)
-
-
-4. Let the install and provision process complete - If successful, you will see the following in your shell (your DID and verkey values will be different):
-
-```bash
-    INSTITUTION DID:
-    G9myrXx8qAxaxpqdLkiMqg
-    INSTITUTION VERKEY:
-    9Fxpwp1dVrbHW661fQ7N33Yqj53R7w9ZfPeHYMQR996F
-    ****************************
-    VCX has been successfully initiated
-```
-
-5. You will need to register your DID on the Staging Net at https://selfserve.sovrin.org/ in order to Build your Credentials. (For structured messaging demos, this is not necessary)
-
-6. Load the index.html page in a web browser by going directly to the VM IP address http://172.28.128.99 (the IP address has been hard set)
-
-7. Go to the Build Credentials page and make sure that both credentials are built (passport and employee). The two credentials have a dropdown to select. Both must be built in order to have a successful demonstration of the Credential Exchange.
-
-8. Return to the home page, click the Issue Credential  Request button, and using Connect.Me, scan the resulting QR code that appears in the box. IF no QR code appears, you can check the status of the VCXWebApp.service by running the following command *in your VM console*. If there are any errors, they should be logged after the command has been run.
-
-```bash
-    sudo systemctl status VCXWebApp.service
-```
+## Command-Line Interface Tools
 
 **CLI-Tools** - Command line tools for NodeJS and Python are installed with this app in /server/. These can be executed at any time (separately from the vcx-server) to run standard VCX commands through the shell for testing purposes.
 

@@ -30,12 +30,22 @@ fi
 
 # This commands substitutes <CHANGE_ME> values in libVCX configuration file with the values provided in the arguments
 echo "Updating vcx-config.json..."
-sed -i -e 's!"institution_name": "<CHANGE_ME>"!"institution_name": "'"$INSTITUTION_NAME"'"!' \
-       -e 's!"institution_logo_url": "<CHANGE_ME>"!"institution_logo_url": "'"$INSTITUTION_LOGO"'"!' \
+sed -i -e 's!"institution_name": "<NO_INSTITUTION_NAME>"!"institution_name": "'"$INSTITUTION_NAME"'"!' \
+       -e 's!"institution_logo_url": "<NO_LOGO_URL>"!"institution_logo_url": "'"$INSTITUTION_LOGO"'"!' \
        -e 's!"genesis_path": "<CHANGE_ME>"!"genesis_path": "'"$GEN_TXN_PATH"'"!' \
        -e 's!"payment_method": "null"!"payment_method": "sov"!' \
        -e 's!"genesis_path"!"author_agreement": "{\\"taaDigest\\": \\"8cee5d7a573e4893b08ff53a0761a22a1607df3b3fcd7e75b98696c92879641f\\",\\"acceptanceMechanismType\\":\\"on_file\\",\\"timeOfAcceptance\\": '"$(date +%s)"'}",\n  "genesis_path"!' vcx-config.json
 # chown indy.indy vcx-config.json
+
+jq '.threadpool_coun="64"' vcx-config.json > tmp && mv tmp vcx-config.json
+
+jq '.protocol_type="3.0"' vcx-config.json > tmp && mv tmp vcx-config.json
+
+
+# jq '.storage_config="{\"db_name\": \"wallet\", \"port\": 3306, \"write_host\": \"'"$WALLET_HOST"'\", \"read_host\": \"'"$WALLET_HOST"'\"}"' vcx-config.json > tmp && mv tmp vcx-config.json
+
+# jq '.storage_credentials="{\"user\": \"'"$WALLET_USERNAME"'\", \"pass\" : \"'"$WALLET_PASSWORD"'\"}"' vcx-config.json > tmp && mv tmp vcx-config.json
+
 
 INSTITUTION_DID=$(grep institution_did vcx-config.json | awk 'BEGIN {FS="\""} {print $4}')
 INSTITUTION_VERKEY=$(grep institution_verkey vcx-config.json | awk 'BEGIN {FS="\""} {print $4}')

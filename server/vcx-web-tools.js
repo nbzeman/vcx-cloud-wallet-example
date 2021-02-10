@@ -251,7 +251,7 @@ async function requestProof(proof_name,connection){
     await proof.updateState();
     let state = await proof.getState();
     let timer = 0;
-    while(state != StateType.RequestReceived && timer < 2000){
+    while(state != StateType.RequestReceived && timer < 200){
         console.log(`The state of the proof is ${state} and the timer is ${timer}`);
         await sleep(2000);
         await proof.updateState();

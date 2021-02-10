@@ -51,7 +51,8 @@ RUN apt-get update && \
       
 RUN dpkg -i libindy_1.15*.deb
 RUN dpkg -i libsovtoken_1.0.5_amd64.deb
-RUN dpkg -i libvcx_0.8.*
+RUN dpkg -i libmysqlstorage_0.1.1131_amd64.deb
+RUN dpkg -i libvcx_0.1*
 RUN apt-get install -f
 
 # NodeJS 10.x install
