@@ -21,6 +21,7 @@ app.use(bodyParser.urlencoded({ extended: false }));
 const server = require('http').Server(app);
 const io = require('socket.io')(server);
 var vcx = require('node-vcx-wrapper');
+let connection_id = 0;
 const {
   Schema,  
   DisclosedProof,
@@ -207,9 +208,125 @@ app.post(`/api/v1/receive_proof_request`, async function(req,res){
 
 })
 
+// Get Connection Invite
+
+app.post('/api/v1/get_invite', async function(req,res){
+  const {type, name, phonenumnber} = req.body ;
+  let state = 0;
+  if (type === "qr"){
+    let connection = await vcxwebtools.makeConnection('QR','connection_1',req.body['phonenumber'],true);
+    let qrcode = qr.image(await connection.inviteDetails(true), { type: 'png' });
+    res.setHeader('Content-type', 'image/png');
+    res.writeHead(200, {'Content-Type': 'image/png'});
+    qrcode.pipe(res);
+    io.emit("connection waiting");
+    let timer = 0;
+    while(state != 4 && state != 8 && timer < 100){
+        sleep(5000);
+        await connection.updateState();
+        state = await connection.getState();
+        console.log("State is :::");
+        console.log(state);
+    }
+    timer =0;
+    if(state===8){
+      console.log("Connection Redirected");
+    }
+  }
+  else {
+    let connection = await vcxwebtools.makeConnection('QR','connection_1',req.body['phonenumber'],true);
+    let serialized_connection = await connection.serialize();
+    let invite_details = await connection.inviteDetails(false);
+    console.log(serialized_connection);
+    console.log(invite_details);
+    res.send(JSON.stringify(invite_details));
+    let timer = 0;
+    while(state != 4 && state != 8 && timer < 100){
+        sleep(5000);
+        await connection.updateState();
+        state = await connection.getState();
+        console.log("State is :::");
+        console.log(state);
+    }
+    timer =0;
+    if(state===8){
+      console.log("Connection Redirected");
+    }
+  }
+})
+
+//Offer Credentials
+
+app.post('/api/v1/offer_credential', async function(req,res){
+    console.log(req.body);
+     let give_cred = req.body['give_cred'];
+     let connection = await vcxwebtools.makeConnection('QR','connection_1',req.body['phonenumber'],true);
+         // create qr code
+      let qrcode = qr.image(await connection.inviteDetails(true), { type: 'png' });
+      res.setHeader('Content-type', 'image/png');
+      res.writeHead(200, {'Content-Type': 'image/png'});
+      qrcode.pipe(res);
+      io.emit("connection waiting");
+     // poll for accepted state of Connection Request
+     let state = await connection.getState();
+     let timer = 0;
+     // set up loop to poll for a response or a timeout if there is no response
+     while(state != 4 && state != 8 && timer < 1250) {
+         console.log("The State of the Connection is "+ state + " "+timer);
+         await sleep(2000);
+         await connection.updateState();
+         state = await connection.getState();
+         timer+=1;
+     }
+     timer=0;
+     // check for expiration or acceptance
+     if(state == 4){
+         timer = 0;
+         console.log(`Connection Accepted! Connection ID is : ${connection_id}`);
+         io.emit('connection ready');
+         connection_id+=1;
+         await vcxwebtools.storeConnection(connection, connection_id);
+         console.log(` connection ID is :  ${connection_id}`);
+        // reset global timeout
+        timer = 0;
+        io.emit('credential offered');
+        let cred = await vcxwebtools.offerCredential(give_cred,connection);
+        if(cred){
+          io.emit('credential issued');
+          complete=true;
+        }
+      }else if(state == 8){//check for redirected state
+        timer = 0;
+        console.log("Connection Redirected!");
+        await connection.updateState();
+        state = await connection.getState();
+        io.emit('connection ready');
+        // reset global timeout
+        timer = 0;
+        io.emit('credential offered');
+        // get the redirect details
+        let redirected_details = await connection.getRedirectDetails();
+        // search and return name of Connection data with matching public DID
+        let redirected_connection = await vcxwebtools.searchConnectionsByTheirDid(redirected_details);
+        // deserialize connection return
+        console.log(redirected_connection);
+        // offer cred to old connection
+        if(redirected_connection != false){
+          let cred = await vcxwebtools.offerCredential(give_cred,redirected_connection);
+          if(cred){
+            io.emit('credential issued');
+          }
+        }else{
+          io.emit('connection not found');
+        }
+        complete=true;
+      }
+  })
+
+
 // Enterprise Offer Credentials
 
-app.post(`/api/v1/offer_credentials`, async function(req,res){
+app.post(`/api/v1/offer_enterprise_credentials`, async function(req,res){
   console.log(req.body);
   let cred_name = req.body['credential'];
   let endpoint = req.body['endpoint'];
@@ -217,13 +334,6 @@ app.post(`/api/v1/offer_credentials`, async function(req,res){
   let details = await connection.inviteDetails(true);
   console.log(details);
   console.log(endpoint);
-  // send connection request to endpoint via request
-//   axios.post(
-//       `${endpoint}/api/v1/receive_credentials`,
-//       details
-//   ).then(function (response) {
-//     console.log(response);
-//   })
   axios({
     method: 'post',
     url: `${endpoint}/api/v1/receive_credentials`,
@@ -248,10 +358,9 @@ app.post(`/api/v1/receive_credentials`, async function(req,res){
      //get details
      console.log("ACCEPTING REQUEST...");
      console.log(req.body);
-     let inviter = req.body['s']['n'];
+     let inviter = req.body['label'];
      let inviteDetails = JSON.stringify(req.body);
      console.log(inviteDetails);
-     //io.emit('recipient_news',{connection:`Connection Requested has been sent by ${inviter}`});
      let connection = await vcxwebtools.connectWithInvitation(inviter, inviteDetails);
      // build connection
      await connection.connect({id:inviter});
