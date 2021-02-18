@@ -37,7 +37,7 @@ sed -i -e 's!"institution_name": "<NO_INSTITUTION_NAME>"!"institution_name": "'"
        -e 's!"genesis_path"!"author_agreement": "{\\"taaDigest\\": \\"8cee5d7a573e4893b08ff53a0761a22a1607df3b3fcd7e75b98696c92879641f\\",\\"acceptanceMechanismType\\":\\"on_file\\",\\"timeOfAcceptance\\": '"$(date +%s)"'}",\n  "genesis_path"!' vcx-config.json
 # chown indy.indy vcx-config.json
 
-jq '.threadpool_coun="64"' vcx-config.json > tmp && mv tmp vcx-config.json
+jq '.threadpool_count="64"' vcx-config.json > tmp && mv tmp vcx-config.json
 
 jq '.protocol_type="3.0"' vcx-config.json > tmp && mv tmp vcx-config.json
 
