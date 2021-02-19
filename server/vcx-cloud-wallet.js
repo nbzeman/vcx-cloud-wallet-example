@@ -32,6 +32,7 @@ const {
   Proof,
   StateType,
   Error,
+  defaultLogger,
   rustAPI
 } = vcx;
 // sockets.io listen
@@ -218,9 +219,9 @@ app.post(`/api/v1/receive_proof_request`, async function(req,res){
 // Get Connection Invite //
 
 app.post('/api/v1/get_invite', async function(req,res){
-  const {type, name, phonenumnber} = req.body ;
+  const {protocol, type, name, phonenumber} = req.body ;
   let state = 0;
-  if (type === "qr"){
+  if (type === "qr" && protocol === "standard"){
     let connection = await vcxwebtools.makeConnection('QR','connection_1',req.body['phonenumber'],true);
     let qrcode = qr.image(await connection.inviteDetails(true), { type: 'png' });
     res.setHeader('Content-type', 'image/png');
@@ -239,8 +240,27 @@ app.post('/api/v1/get_invite', async function(req,res){
       console.log("Connection Redirected");
     }
   }
-  else {
+  else if (type === "json" && protocol === "standard") {
     let connection = await vcxwebtools.makeConnection('QR','connection_1',req.body['phonenumber'],true);
+    let serialized_connection = await connection.serialize();
+    let invite_details = await connection.inviteDetails(false);
+    console.log(serialized_connection);
+    console.log(invite_details);
+    res.send(JSON.parse(invite_details));
+    let timer = 0;
+    while(state != 4 && state != 8 && timer < 100){
+      sleep(2000);
+      await connection.updateState();
+      state = await connection.getState();
+      console.log(`Connection State is :: ${state}`);
+  }
+    timer =0;
+    if(state===8){
+      console.log("Connection Redirected");
+    }
+  }
+  else if (type === "json" && protocol === "outOfBand"){
+    let connection = await makeOutOfBandConnection(name,true);
     let serialized_connection = await connection.serialize();
     let invite_details = await connection.inviteDetails(false);
     console.log(serialized_connection);
@@ -264,12 +284,16 @@ app.post('/api/v1/get_invite', async function(req,res){
 
 app.post('/api/v1/accept_invite', async function(req,res){
   let timer =0;
-  const {connection_invite, name} = req.body ;
+  const {protocol, connection_invite, name} = req.body ;
   let invite = JSON.stringify(connection_invite);
   console.log("Accepting Connection Invite");
   console.log(invite);
   // let connection = await vcxwebtools.connectWithInvitation(name, invite);
-  let connection = await Connection.createWithInvite({"id":name,"invite": invite});
+  if (protocol === "standard"){
+    let connection = await Connection.createWithInvite({"id":name,"invite": invite});
+  }else if (protocol === "outOfBand"){
+    let connection = await Connection.createWithOutofbandInvite({sourceId:"id@1", invite:invite});
+  }
   let state = 0;
   while(state != 4 && state != 8 && timer < 100){
       sleep(2000);
@@ -286,6 +310,14 @@ app.post('/api/v1/accept_invite', async function(req,res){
 
 })
 
+
+async function makeOutOfBandConnection(type = 'QR', source_id, usePublicDid) {
+  const connection = await Connection.createOutofband({ id: source_id, handshake: true });
+  const connectionData = { id: source_id, connection_type: type, use_public_did: usePublicDid, update_agent_info: true };
+  const connectionArgs = { data: JSON.stringify(connectionData) };
+  await connection.connect(connectionArgs);
+  return connection;
+}
 
 // Credentials
 
