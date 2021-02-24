@@ -288,23 +288,26 @@ app.post('/api/v1/accept_invite', async function(req,res){
   let invite = JSON.stringify(connection_invite);
   console.log("Accepting Connection Invite");
   console.log(invite);
-  // let connection = await vcxwebtools.connectWithInvitation(name, invite);
+  let connection = {};
   if (protocol === "standard"){
-    let connection = await Connection.createWithInvite({"id":name,"invite": invite});
+    let data = '{"connection_type":"SMS","phone":"5555555555"}';// dummy legacy data must be included
+    connection = await Connection.acceptConnectionInvite({"id":name,"invite": invite,"data":data});
   }else if (protocol === "outOfBand"){
-    let connection = await Connection.createWithOutofbandInvite({sourceId:"id@1", invite:invite});
+    connection = await makeOutOfBandConnection("QR","connection-sourceId",true);
   }
   let state = 0;
   while(state != 4 && state != 8 && timer < 100){
       sleep(2000);
+      timer +=1;
       await connection.updateState();
       state = await connection.getState();
       console.log("State is :::");
       console.log(state);
   }
+  timer = 0;
   let serialized_connection = await connection.serialize();
   // store connection locally (upgrade to mysql soon!!)
-  await fs.writeJSON(`../data/${name}-connection.json`);
+  await fs.writeJSON(`../data/${name}-connection.json`,serialized_connection);
   res.send("Connection Accepted:: "+ serialized_connection );
   timer = 0;
 
