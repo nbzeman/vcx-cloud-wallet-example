@@ -308,7 +308,7 @@ app.post('/api/v1/accept_invite', async function(req,res){
   let serialized_connection = await connection.serialize();
   // store connection locally (upgrade to mysql soon!!)
   await fs.writeJSON(`../data/${name}-connection.json`,serialized_connection);
-  res.send("Connection Accepted:: "+ serialized_connection );
+  res.send("Connection Accepted:: " + JSON.stringify(serialized_connection) );
   timer = 0;
 
 })
