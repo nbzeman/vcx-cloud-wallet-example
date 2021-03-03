@@ -5,8 +5,8 @@ VCX_CONFIG_PATH=/root/config/vcx-config.json
 COMPOSE_CONVERT_WINDOWS_PATHS=1
 #These are deployment specific bits that affect how VCX will be provisioned
 GEN_TXN_PATH=/root/config/genesis.txn
-#AGENCY_URL=https://agency.pps.evernym.com - CAS 
-AGENCY_URL=https://eas01.pps.evernym.com
+AGENCY_URL=https://agency.pps.evernym.com
+#AGENCY_URL=https://eas01.pps.evernym.com
 INSTITUTION_NAME= EV Cloud Wallet
 INSTITUTION_LOGO=https://s3.us-east-2.amazonaws.com/static.evernym.com/images/icons/cropped-Evernym_favicon-trans-192x192.png
 # An Empty ENTERPRISE_SEED will trigger build script to auto-generate a random seed

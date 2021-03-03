@@ -17,6 +17,7 @@ const {
   Proof,
   StateType,
   Error,
+  defaultLogger,
   rustAPI
 } = vcx;
 // load up libsovtoken
@@ -24,6 +25,7 @@ async function run(){
     const myffi = ffi.Library('/usr/lib/libsovtoken.so', {sovtoken_init: ['void', []]});
     await myffi.sovtoken_init();
     await vcx.initVcx(config);
+    defaultLogger('debug');
 }
 run();
 
