@@ -54,6 +54,57 @@ app.use(express.urlencoded());
 // express set up Cross Origin
 app.use(cors());
 
+// listen for credential offers
+async function credentialOfferListen(){
+  const directoryPath = `../data/`;
+  let connection_list = [];
+  await fs.readdir(directoryPath, function (err,files){
+    if(err) {
+      return console.log('Unable to scan directory: ' + err); 
+    }
+    files.forEach(async function(file){
+      if(file.includes("connection")){
+        console.log("file is named " + file);
+        let connection = await fs.readJSON(directoryPath+file);
+        console.log(connection);
+        let deserialized_connection = await Connection.deserialize(connection);
+        connection_list.push(deserialized_connection);
+        console.log("connections count : " + connection_list.length);
+      }
+      connection_list.forEach(async function(conn){
+        await getOffers(conn);
+      })
+    })
+  })
+}
+
+// Begin Listening for Offers
+// credentialOfferListen();
+
+
+async function getOffers(connection){
+  console.log("des connection = "+ connection);
+  let offers = await Credential.getOffers(connection);
+  while(offers.length < 1){
+      sleep(5000);
+      offers = await Credential.getOffers(connection);
+      console.log("Credential Offers Below:");
+      console.log(JSON.stringify(offers[0]));
+      io.emit('recipient_news',{conn: JSON.stringify(offers[0])});
+  }
+  let credential = await Credential.create({ sourceId: 'enterprise', offer: JSON.stringify(offers[0]), connection: connection});
+  await credential.sendRequest({ connection: connection, payment: 0});
+  let credentialState = await credential.getState();
+  while (credentialState !== StateType.Accepted) {
+    sleep(5000);
+    await credential.updateState();
+    credentialState = await credential.getState();
+    console.log(`Credential state is : ${credentialState}`);
+  }
+  let serial_cred = await credential.serialize();
+  console.log(serial_cred);
+}
+
 //simple GET to test and retrieve directory info from Data
 app.get(`/api/v1/file_list`,async function(req,res){
     let pfilter = req.body['filter'];
@@ -313,7 +364,6 @@ app.post('/api/v1/accept_invite', async function(req,res){
 
 })
 
-
 async function makeOutOfBandConnection(type = 'QR', source_id, usePublicDid) {
   const connection = await Connection.createOutofband({ id: source_id, handshake: true });
   const connectionData = { id: source_id, connection_type: type, use_public_did: usePublicDid, update_agent_info: true };
@@ -443,12 +493,10 @@ app.post(`/api/v1/receive_credentials`, async function(req,res){
      //get details
      console.log("ACCEPTING REQUEST...");
      console.log(req.body);
-     let inviter = req.body['label'];
-     let inviteDetails = JSON.stringify(req.body);
-     console.log(inviteDetails);
-     let connection = await vcxwebtools.connectWithInvitation(inviter, inviteDetails);
-     // build connection
-     await connection.connect({id:inviter});
+     let invite = JSON.stringify(req.body);
+     console.log(invite);
+     let data = '{"connection_type":"SMS","phone":"5555555555"}';// dummy legacy data must be included
+     let connection = await Connection.acceptConnectionInvite({"id":"name","inviter": invite,"data":data});
      console.log('Connection Invite Accepted');
      await connection.updateState();
      let state = await connection.getState();
@@ -459,6 +507,10 @@ app.post(`/api/v1/receive_credentials`, async function(req,res){
          console.log(state);
      }
      io.emit('recipient_news',{connection:`Credential offers from ${inviter} are :`});
+     let serialized_connection = await connection.serialize();
+     // store connection locally (upgrade to mysql soon!!)
+     await fs.writeJSON(`../data/${invite.label}-connection.json`,serialized_connection);
+     timer = 0;
      let offers = await Credential.getOffers(connection);
      while(offers.length < 1){
          offers = await Credential.getOffers(connection);

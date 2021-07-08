@@ -24,7 +24,7 @@ RUN apt-get update && \
 #### Needed Repos
 RUN echo "deb https://repo.sovrin.org/sdk/deb bionic stable" > /etc/apt/sources.list.d/sovrin.list && \
     cnt=0 ;\
-    while ! apt-key adv --keyserver keyserver.ubuntu.com --recv-keys CE7709D068DB5E88 2>&1; do \
+    while ! apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 97080EBDA5D46DAF 2>&1; do \
         echo "Waiting 1 second before retrying gpg key download.($cnt/10)" ;\
         sleep 1 ;\
         cnt=$((cnt + 1)); \
@@ -33,6 +33,8 @@ RUN echo "deb https://repo.sovrin.org/sdk/deb bionic stable" > /etc/apt/sources.
             exit 1 ;\
         fi ;\
     done
+
+# RUN sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 97080EBDA5D46DAF
 
 #### Install Libindy/Sovtoken and Dependencies
 COPY install/* /root/install/
@@ -47,7 +49,7 @@ RUN apt-get update && \
     apt-get install -y \
       libsodium23 \
       libzmq5 \
-      libssl1.0.0
+      libssl1.0.0 
       
 RUN dpkg -i libindy_1.15*.deb
 RUN dpkg -i libsovtoken_1.0.5_amd64.deb
