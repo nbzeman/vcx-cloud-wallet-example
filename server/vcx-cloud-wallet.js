@@ -16,12 +16,14 @@ let complete = false;
 // set up app express server
 const PORT = 5050;
 const app = express();
+const sessions = {};
 app.use(session({secret: "SecretKey"}));
 app.use(bodyParser.urlencoded({ extended: false }));
 const server = require('http').Server(app);
 const io = require('socket.io')(server);
 var vcx = require('node-vcx-wrapper');
 let connection_id = 0;
+
 const {
   Schema,  
   DisclosedProof,
@@ -35,6 +37,8 @@ const {
   defaultLogger,
   rustAPI
 } = vcx;
+
+
 // sockets.io listen
 io.on('connection',socket=>{
     socket.on('disconnect',()=>{
@@ -43,6 +47,7 @@ io.on('connection',socket=>{
         console.log(data);
     })
 })
+
 // express server listen
 server.listen(PORT,function(){
     console.log(`Listening on Port ${PORT}`);
@@ -81,22 +86,21 @@ async function credentialOfferListen(){
 // Begin Listening for Offers
 // credentialOfferListen();
 
-
 async function getOffers(connection){
-  console.log("des connection = "+ connection);
+  console.log("deserialized connection = " + JSON.stringify(connection));
   let offers = await Credential.getOffers(connection);
   while(offers.length < 1){
-      sleep(5000);
+      // sleep(50);
       offers = await Credential.getOffers(connection);
       console.log("Credential Offers Below:");
       console.log(JSON.stringify(offers[0]));
-      io.emit('recipient_news',{conn: JSON.stringify(offers[0])});
+      // io.emit('recipient_news',{conn: JSON.stringify(offers[0])});
   }
   let credential = await Credential.create({ sourceId: 'enterprise', offer: JSON.stringify(offers[0]), connection: connection});
   await credential.sendRequest({ connection: connection, payment: 0});
   let credentialState = await credential.getState();
   while (credentialState !== StateType.Accepted) {
-    sleep(5000);
+    sleep(50);
     await credential.updateState();
     credentialState = await credential.getState();
     console.log(`Credential state is : ${credentialState}`);
@@ -260,15 +264,7 @@ app.post(`/api/v1/receive_proof_request`, async function(req,res){
 
 })
 
-
-
-//Offer Credentials
-
-
-// Connections
-
 // Get Connection Invite //
-
 app.post('/api/v1/get_invite', async function(req,res){
   const {protocol, type, name, phonenumber} = req.body ;
   let state = 0;
@@ -330,9 +326,11 @@ app.post('/api/v1/get_invite', async function(req,res){
     }
   }
 })
-
+// Server Check
+app.post('/api/v1/health_check', async function(req,res){
+  res.send('cloud wallet server is running');
+}) 
 // Accept Connection Invite //
-
 app.post('/api/v1/accept_invite', async function(req,res){
   let timer =0;
   const {protocol, connection_invite, name} = req.body ;
@@ -456,7 +454,6 @@ app.post('/api/v1/offer_credential', async function(req,res){
   }
   })
 
-
 // Proofs
 
 // Enterprise Offer Credentials
@@ -576,3 +573,4 @@ let timeUp = function(x){
 function sleep(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));
 }
+

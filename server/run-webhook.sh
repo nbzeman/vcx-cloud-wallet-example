@@ -1,5 +1,5 @@
 #!/bin/bash
-SUPERVISOR=${SUPERVISOR}
+WEBHOOK=${WEBHOOK}
 echo "Running Node Express VCX Server"
 set -e
-node $SUPERVISOR
+node $WEBHOOK

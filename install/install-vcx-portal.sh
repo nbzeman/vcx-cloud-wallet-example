@@ -1,5 +1,6 @@
 #!/bin/bash
 set -e
+set -o pipefail
 cd /root/install/
 
 # Remove config before installing and provisioning
@@ -46,19 +47,25 @@ cp /root/web/default /etc/nginx/sites-available/default
 node /root/server/vcx-cli-tools.js testVCX &&
 
 # Build Credentials from schema (needs to be set in a loop)
-cd /root/server &&
-for script in $(find /root/data/ -type f -name "*schema.json" | sort -n); do
-    y=${script%-schema.json}
-    z=${y##*/}
-    echo $z
-    echo -e "\nRunning Credential Build: '$z'"
-    node vcx-cli-tools.js createCredentialDef "$z"
-    sync
-    rc=$?
-    if [ $rc -ne 0 ] ; then
-        exit $rc
-    fi
-done
+# cd /root/server &&
+# for script in $(find /root/data/ -type f -name "*schema.json" | sort -n); do
+#     y=${script%-schema.json}
+#     z=${y##*/}
+#     echo $z
+#     echo -e "\nRunning Credential Build: '$z'"
+#     node vcx-cli-tools.js createCredentialDef "$z"
+#     sync
+#     rc=$?
+#     if [ $rc -ne 0 ] ; then
+#         exit $rc
+#     fi
+# done
+
+
+GREEN='\033[0;32m'
+NC='\033[0m' # No Color
+WEBHOOK_PORT=3000
+
 
 ### THIS IS CONSIDERED ENTRYPOINT MEANING SUPERVISORD STARTS UP
 echo -e "\nStarting supervisor"

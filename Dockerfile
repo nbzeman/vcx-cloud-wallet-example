@@ -8,6 +8,7 @@ RUN apt-get update && \
         dirmngr \
         ca-certificates  \
         curl \
+         unzip \
         software-properties-common \
         vim \
         supervisor \
@@ -43,6 +44,10 @@ COPY data/* /root/data/
 COPY server/* /root/server/
 COPY web/ /root/web/
 
+
+EXPOSE 3000
+
+
 # Add Keys and Update apt-get Libraries:
 WORKDIR /root/install
 RUN apt-get update && \
@@ -63,6 +68,12 @@ RUN . /etc/os-release && \
     echo "deb https://deb.nodesource.com/node_10.x ${UBUNTU_CODENAME} main" > /etc/apt/sources.list.d/nodesource.list && \
     apt-get update && \
     apt-get install -y nodejs --no-install-recommends
+# 
+
+# Install Ngrok
+RUN curl -O -s https://bin.equinox.io/c/4VmDzA7iaHb/ngrok-stable-linux-amd64.zip && \
+    unzip ngrok-stable-linux-amd64.zip && \
+    cp ngrok /usr/local/bin/.
 
 #### Cleanup
 # clean up apt lists

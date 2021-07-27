@@ -213,6 +213,7 @@ async function createCredentialDef(schema_name){
         revocationDetails: {
             tailsFile: 'tails.txt',
         },
+        tag:"tag",
         schemaId: schema_data.schemaId,
         sourceId: schema_data.sourceId
     };
