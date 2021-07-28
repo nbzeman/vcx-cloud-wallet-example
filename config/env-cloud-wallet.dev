@@ -9,12 +9,11 @@ AGENCY_URL=https://eas01.pps.evernym.com
 INSTITUTION_NAME= EV Cloud Wallet
 INSTITUTION_LOGO=https://s3.us-east-2.amazonaws.com/static.evernym.com/images/icons/cropped-Evernym_favicon-trans-192x192.png
 # An Empty ENTERPRISE_SEED will trigger build script to auto-generate a random seed
-# ENTERPRISE_SEED=xxxxxxxxx000000000000xxx0xxxxxxx
 ENTERPRISE_SEED=oolee0eeciemie8esiepheejahViex7y
 GENESIS_FILE_URL="https://raw.githubusercontent.com/sovrin-foundation/sovrin/stable/sovrin/pool_transactions_sandbox_genesis"
 WALLET_NAME=LIBVCX_SDK_WALLET
 WALLET_KEY=12345
-RESTENDPOINT=localhost:8081/api/v1/
+RESTENDPOINT=http://localhost:80/api/v1/
 SUPERVISOR=vcx-cloud-wallet.js
 WEBHOOK=vcx-webhook-response-ngrok.js
 ## Only for debugging
@@ -22,4 +21,8 @@ WEBHOOK=vcx-webhook-response-ngrok.js
 VERITY_URL=https://vas.pps.evernym.com
 DOMAIN_DID=XGS2Kqt3PGGPgghr1xDxJe
 X_API_KEY=3mvtW1nhPCXNcC3y11BJ77QjXanMMaoL78JGkZ4iLGHh:3H5Tsmtb77N1jz3DBVaUfLyFtArTDFg54xLJJiwNuhvBcW9WesUNEUHUUjR14QWyD85j3DEUnqsbkPgDXJffTfhj
-
+WALLET_HOST=mysql
+WALLET_DB_NAME=db
+WALLET_USERNAME=root
+WALLET_PASSWORD=password
+WALLET_USE_SSL=false

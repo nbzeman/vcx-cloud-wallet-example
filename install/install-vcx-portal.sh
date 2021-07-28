@@ -41,8 +41,8 @@ yes | apt-get install nginx &&
 rm -Rf /var/www/html/* &&
 # symlink /var/www => ../web
 cp -r /root/web/* /var/www/html &&
-cp /root/web/default /etc/nginx/sites-available/default
-
+cp /root/web/default /etc/nginx/sites-available/default &&
+cat /etc/nginx/sites-available/default
 # PREP AND REGISTER
 node /root/server/vcx-cli-tools.js testVCX &&
 

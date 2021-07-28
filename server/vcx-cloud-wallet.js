@@ -327,7 +327,7 @@ app.post('/api/v1/get_invite', async function(req,res){
   }
 })
 // Server Check
-app.post('/api/v1/health_check', async function(req,res){
+app.get('/api/v1/health_check', async function(req,res){
   res.send('cloud wallet server is running');
 }) 
 // Accept Connection Invite //
