@@ -21,7 +21,7 @@ echo "  as Insitituion: $INSTITUTION_NAME with logo: $INSTITUTION_LOGO"
 # this sets up the mysql wallet
 # python3 /usr/share/libvcx/provision_agent_keys.py -v --wallet-type mysql --wallet-name "${WALLET_NAME}" --storage-config "{\"db_name\": \"$WALLET_DB_NAME\", \"port\": 3306, \"write_host\": \"$WALLET_HOST\", \"read_host\": \"$WALLET_HOST\", \"use_ssl\": $WALLET_USE_SSL}" --storage-credentials "{\"user\": \"$WALLET_USERNAME\", \"pass\" : \"$WALLET_PASSWORD\"}" \ "${AGENCY_URL}" "${WALLET_KEY}" > vcx-config.json
 
-python3 /usr/share/libvcx/provision_agent_keys.py -v --enterprise-seed "$ENTERPRISE_SEED" --wallet-name $WALLET_NAME $AGENCY_URL $WALLET_KEY > vcx-config.json
+python3 /usr/share/libvcx/provision_agent_keys.py -v --enterprise-seed "$ENTERPRISE_SEED" --wallet-name $WALLET_NAME  $AGENCY_URL $WALLET_KEY > vcx-config.json
 
 if [ $? -ne 0 ] ; then
     echo "ERROR occurred trying to provision agent! Aborting!"

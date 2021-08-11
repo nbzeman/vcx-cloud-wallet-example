@@ -3,6 +3,7 @@
 // Works as an automated cloud version of Connect.Me, using a REST API as a message transport to prompt the Credential Exchange
 
 // imports
+const mysql = require("mysql");
 const axios = require('axios');
 var request = require('request');
 var cors = require('cors');
@@ -38,7 +39,7 @@ const {
   rustAPI
 } = vcx;
 
-
+// connect to database
 // sockets.io listen
 io.on('connection',socket=>{
     socket.on('disconnect',()=>{
@@ -58,7 +59,11 @@ app.use(express.json());
 app.use(express.urlencoded());
 // express set up Cross Origin
 app.use(cors());
-
+async function init(){
+  let db = await databaseConnect();
+  await createConnectionsTable(db);
+}
+init();
 // listen for credential offers
 async function credentialOfferListen(){
   const directoryPath = `../data/`;
@@ -340,26 +345,26 @@ app.post('/api/v1/accept_invite', async function(req,res){
   let connection = {};
   if (protocol === "standard"){
     let data = '{"connection_type":"SMS","phone":"5555555555"}';// dummy legacy data must be included
-    connection = await Connection.acceptConnectionInvite({"id":name,"invite": invite,"data":data});
+    //connection = await Connection.acceptConnectionInvite({"id":name,"invite": invite,"data":data});
+    connection = await acceptConnectionInvite(name, invite);
   }else if (protocol === "outOfBand"){
     connection = await makeOutOfBandConnection("QR","connection-sourceId",true);
   }
-  let state = 0;
-  while(state != 4 && state != 8 && timer < 100){
-      sleep(2000);
-      timer +=1;
-      await connection.updateState();
-      state = await connection.getState();
-      console.log("State is :::");
-      console.log(state);
-  }
-  timer = 0;
-  let serialized_connection = await connection.serialize();
-  // store connection locally (upgrade to mysql soon!!)
-  await fs.writeJSON(`../data/${name}-connection.json`,serialized_connection);
-  res.send("Connection Accepted:: " + JSON.stringify(serialized_connection) );
-  timer = 0;
-
+  // let state = 0;
+  // while(state != 4 && state != 8 && timer < 100){
+  //     sleep(2000);
+  //     timer +=1;
+  //     await connection.updateState();
+  //     state = await connection.getState();
+  //     console.log("State is :::");
+  //     console.log(state);
+  // }
+  // timer = 0;
+  // let serialized_connection = await connection.serialize();
+  // // store connection locally (upgrade to mysql soon!!)
+  // await fs.writeJSON(`../data/${name}-connection.json`,serialized_connection);
+  // res.send("Connection Accepted:: " + JSON.stringify(serialized_connection) );
+  // timer = 0;
 })
 
 async function makeOutOfBandConnection(type = 'QR', source_id, usePublicDid) {
@@ -529,6 +534,113 @@ app.post(`/api/v1/receive_credentials`, async function(req,res){
      //await fs.writeJSON(`./data/received-credential.json`,serial_cred);
      //io.emit('recipient_news',{connection:`Credential Accepted`});
 })
+
+// return mysql connection
+async function databaseConnect(){
+  let db = mysql.createConnection({
+      host: process.env.WALLET_HOST,
+      user: process.env.WALLET_USERNAME,
+      password: process.env.WALLET_PASSWORD,
+      database: process.env.WALLET_DB_NAME
+  });
+  return db;
+}
+
+// create table Conneciton if it doesn't exist
+async function createConnectionsTable(db){
+  db.connect(function(err) {
+    if (err) {
+      return console.error('error: ' + err.message);
+    }
+    let createConnections = `create table if not exists connections(
+                            id int primary key auto_increment,
+                            pw_did varchar(255)not null,
+                            connection_data varchar(60000) not null default 0)`;
+    db.query(createConnections, function(err, results, fields) {
+      if (err) {
+        console.log(err.message);
+      }
+    });
+    db.end(function(err) {
+      if (err) {
+        return console.log(err.message);
+      }
+    });
+  })
+}
+
+// store connection into msql database
+async function storeConnectionMysql(db, serialized_connection){
+  db.connect(function(err) {
+    if (err) {
+      return console.error('error: ' + err.message);
+    }
+  })
+  let post = { "pw_did": serialized_connection.data.their_pw_did, "connection_data": JSON.stringify(serialized_connection) };
+  let sql = "INSERT INTO connections SET ?";
+  let query = db.query(sql, post, (err) => {
+    if (err) {
+      throw err;
+    }else{
+      console.log(`connection stored as ${serialized_connection.data.their_pw_did}`);
+    }
+  })
+}
+// return connection from pw_did value query from MySQL db
+async function getConnectionMysql(db, pw_did){
+  let connection = mysql.createConnection(db);
+  let sql = `SELECT * FROM connections WHERE pw_did = ${pw_did}`;
+  connection.query(sql, (error, results, fields) => {
+    if (error) {
+      return console.error(error.message);
+    }
+    console.log(results);
+  });
+}
+
+// return (deserialized) connection from accepted invite
+async function acceptConnectionInvite(name, invite){
+  let data = '{"connection_type":"SMS","phone":"5555555555"}';// dummy legacy data must be included
+  let connection = await Connection.acceptConnectionInvite({"id":name,"invite": invite,"data":data});
+  let state = 0;
+  let timer =0;
+  while(state != 4 && state != 8 && timer < 100){
+      sleep(2000);
+      timer +=1;
+      await connection.updateState();
+      state = await connection.getState();
+      console.log("Connection State is :::");
+      console.log(state);
+  }
+  timer = 0;
+  let serialized_connection = await connection.serialize();
+  console.log('serialized connection: '+JSON.stringify(serialized_connection));
+  // store connection locally (upgrade to mysql soon!!)
+  // await fs.writeJSON(`../data/${name}-connection.json`,serialized_connection);
+  // connect to mysql db and then write connection to table
+  let db = await databaseConnect();
+  // await createConnectionsTable(db);
+  await storeConnectionMysql(db, serialized_connection);
+  timer = 0;
+  return connection;
+}
+
+// get and return serialized connection from mysql db
+async function getConnection(db,did){
+  db.connect(function(err){
+    if (err) {
+      return console.error('error: ' + err.message);
+    }
+    let sql = `select * from connections where connections.pw_did = '${did}'`;
+    db.query(sql, (error, results, fields) => {
+      if (error) {
+        return console.error(error.message);
+      }
+      let deserialized_connection = await Connection.deserialize(results);
+      return deserialized_connection;
+    });
+  })
+}
 
 // Generate schema and credential definition based upon json file in ./data/cred_name-schema.json
 app.post('/api/v1/build_credential', async function(req,res){

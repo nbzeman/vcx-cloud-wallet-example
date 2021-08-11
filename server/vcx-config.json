@@ -1,0 +1,4 @@
+{
+  "provisioned": false,
+  "provisioned_status": "Failed: Could not register agent.  Try again with '-v' for more details"
+}

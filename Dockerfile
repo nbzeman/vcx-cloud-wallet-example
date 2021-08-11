@@ -57,11 +57,10 @@ RUN apt-get update && \
       libzmq5 \
       libssl1.0.0 
       
-RUN dpkg -i libindy_1.16*.deb
-# RUN dpkg -i libnullpay_1.16.0170-bionic_amd64.deb
+RUN dpkg -i libindy_1.15*.deb
 RUN dpkg -i libsovtoken_1.0.5_amd64.deb
-RUN dpkg -i libmysqlstorage_0.1.13_amd64.deb
-RUN dpkg -i libvcx_0.11*
+RUN dpkg -i libmysqlstorage_0.1.1131_amd64.deb
+RUN dpkg -i libvcx_0.10*
 RUN apt-get install -f
 
 # NodeJS 10.x install
