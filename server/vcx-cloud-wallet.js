@@ -59,11 +59,14 @@ app.use(express.json());
 app.use(express.urlencoded());
 // express set up Cross Origin
 app.use(cors());
+
+// initialize database and build table if it doesn't exist
 async function init(){
   let db = await databaseConnect();
   await createConnectionsTable(db);
 }
 init();
+
 // listen for credential offers
 async function credentialOfferListen(){
   const directoryPath = `../data/`;
@@ -87,9 +90,6 @@ async function credentialOfferListen(){
     })
   })
 }
-
-// Begin Listening for Offers
-// credentialOfferListen();
 
 async function getOffers(connection){
   console.log("deserialized connection = " + JSON.stringify(connection));
@@ -338,33 +338,17 @@ app.get('/api/v1/health_check', async function(req,res){
 // Accept Connection Invite //
 app.post('/api/v1/accept_invite', async function(req,res){
   let timer =0;
-  const {protocol, connection_invite, name} = req.body ;
+  const {protocol, connection_invite, name, thid} = req.body ;
   let invite = JSON.stringify(connection_invite);
   console.log("Accepting Connection Invite");
   console.log(invite);
   let connection = {};
   if (protocol === "standard"){
     let data = '{"connection_type":"SMS","phone":"5555555555"}';// dummy legacy data must be included
-    //connection = await Connection.acceptConnectionInvite({"id":name,"invite": invite,"data":data});
-    connection = await acceptConnectionInvite(name, invite);
+    connection = await acceptConnectionInvite(name, invite, thid);
   }else if (protocol === "outOfBand"){
     connection = await makeOutOfBandConnection("QR","connection-sourceId",true);
   }
-  // let state = 0;
-  // while(state != 4 && state != 8 && timer < 100){
-  //     sleep(2000);
-  //     timer +=1;
-  //     await connection.updateState();
-  //     state = await connection.getState();
-  //     console.log("State is :::");
-  //     console.log(state);
-  // }
-  // timer = 0;
-  // let serialized_connection = await connection.serialize();
-  // // store connection locally (upgrade to mysql soon!!)
-  // await fs.writeJSON(`../data/${name}-connection.json`,serialized_connection);
-  // res.send("Connection Accepted:: " + JSON.stringify(serialized_connection) );
-  // timer = 0;
 })
 
 async function makeOutOfBandConnection(type = 'QR', source_id, usePublicDid) {
@@ -493,25 +477,16 @@ app.post(`/api/v1/offer_enterprise_credentials`, async function(req,res){
 
 app.post(`/api/v1/receive_credentials`, async function(req,res){
      //get details
-     console.log("ACCEPTING REQUEST...");
-     console.log(req.body);
-     let invite = JSON.stringify(req.body);
-     console.log(invite);
-     let data = '{"connection_type":"SMS","phone":"5555555555"}';// dummy legacy data must be included
-     let connection = await Connection.acceptConnectionInvite({"id":"name","inviter": invite,"data":data});
-     console.log('Connection Invite Accepted');
-     await connection.updateState();
-     let state = await connection.getState();
-     while(state != StateType.Accepted){
-         await connection.updateState();
-         state = await connection.getState();
-         console.log("State is :::");
-         console.log(state);
-     }
+     console.log("ACCEPTING INCOMING CREDENTIAL REQUEST...");
+     console.log(JSON.stringify(req.body));
+     let thid = req.body['thid'];
+     console.log(`querying mysql database for ${thid} data`);
+     // query mysql for serialized connection
+     let db = await databaseConnect();
+     let serial_connection = await getConnectionMysql(db,thid);
+     let connection = await Connection.deserialize(serial_connection);
      io.emit('recipient_news',{connection:`Credential offers from ${inviter} are :`});
-     let serialized_connection = await connection.serialize();
-     // store connection locally (upgrade to mysql soon!!)
-     await fs.writeJSON(`../data/${invite.label}-connection.json`,serialized_connection);
+     // retrieve connection from database
      timer = 0;
      let offers = await Credential.getOffers(connection);
      while(offers.length < 1){
@@ -531,7 +506,8 @@ app.post(`/api/v1/receive_credentials`, async function(req,res){
      }
      let serial_cred = await credential.serialize();
      console.log(serial_cred);
-     //await fs.writeJSON(`./data/received-credential.json`,serial_cred);
+     await fs.writeJSON(`./data/received-credential.json`,serial_cred);
+     res.send("credential flow completed");
      //io.emit('recipient_news',{connection:`Credential Accepted`});
 })
 
@@ -554,8 +530,9 @@ async function createConnectionsTable(db){
     }
     let createConnections = `create table if not exists connections(
                             id int primary key auto_increment,
-                            pw_did varchar(255)not null,
-                            connection_data varchar(60000) not null default 0)`;
+                            pw_did varchar(255) not null,
+                            thid varchar(255) not null,
+                            connection_data varchar(20000) not null default 0)`;
     db.query(createConnections, function(err, results, fields) {
       if (err) {
         console.log(err.message);
@@ -570,36 +547,27 @@ async function createConnectionsTable(db){
 }
 
 // store connection into msql database
-async function storeConnectionMysql(db, serialized_connection){
+async function storeConnectionMysql(db, serialized_connection, thid){
   db.connect(function(err) {
     if (err) {
       return console.error('error: ' + err.message);
     }
   })
-  let post = { "pw_did": serialized_connection.data.their_pw_did, "connection_data": JSON.stringify(serialized_connection) };
+  let post = { "thid":thid, "pw_did": serialized_connection.data.their_pw_did, "connection_data": JSON.stringify(serialized_connection) };
   let sql = "INSERT INTO connections SET ?";
   let query = db.query(sql, post, (err) => {
     if (err) {
       throw err;
     }else{
-      console.log(`connection stored as ${serialized_connection.data.their_pw_did}`);
+      console.log(`connection stored as thid ${thid}`);
+      console.log(`connection stored as thid ${serialized_connection.data.their_pw_did}`);
     }
   })
-}
-// return connection from pw_did value query from MySQL db
-async function getConnectionMysql(db, pw_did){
-  let connection = mysql.createConnection(db);
-  let sql = `SELECT * FROM connections WHERE pw_did = ${pw_did}`;
-  connection.query(sql, (error, results, fields) => {
-    if (error) {
-      return console.error(error.message);
-    }
-    console.log(results);
-  });
+  return thid;
 }
 
 // return (deserialized) connection from accepted invite
-async function acceptConnectionInvite(name, invite){
+async function acceptConnectionInvite(name, invite, thid){
   let data = '{"connection_type":"SMS","phone":"5555555555"}';// dummy legacy data must be included
   let connection = await Connection.acceptConnectionInvite({"id":name,"invite": invite,"data":data});
   let state = 0;
@@ -615,29 +583,40 @@ async function acceptConnectionInvite(name, invite){
   timer = 0;
   let serialized_connection = await connection.serialize();
   console.log('serialized connection: '+JSON.stringify(serialized_connection));
-  // store connection locally (upgrade to mysql soon!!)
-  // await fs.writeJSON(`../data/${name}-connection.json`,serialized_connection);
   // connect to mysql db and then write connection to table
   let db = await databaseConnect();
   // await createConnectionsTable(db);
-  await storeConnectionMysql(db, serialized_connection);
+  await storeConnectionMysql(db, serialized_connection, thid);
   timer = 0;
+  let response = {
+    "DID":serialized_connection.data.pw_did,
+    "thid":thid
+  }
+  res.send(response);
   return connection;
 }
 
 // get and return serialized connection from mysql db
-async function getConnection(db,did){
+async function getConnectionMysql(db,thid){
+  console.log(thid);
   db.connect(function(err){
     if (err) {
       return console.error('error: ' + err.message);
     }
-    let sql = `select * from connections where connections.pw_did = '${did}'`;
-    db.query(sql, (error, results, fields) => {
+    let sql = `SELECT connection_data FROM connections WHERE thid = '${thid}'`;
+    console.log(sql);
+    db.query (sql, async (error, results, fields) => {
       if (error) {
         return console.error(error.message);
       }
-      let deserialized_connection = await Connection.deserialize(results);
-      return deserialized_connection;
+      console.log(`logging the mysql return query:`);
+      console.log(results[0]);
+      let serial_connection = JSON.parse(results[0]);
+      console.log('serialized_connection : ');
+      console.log(serial_connection);
+      // let deserialized_connection = await Connection.deserialize(serial_connection);
+      // console.log(deserialized_connection);
+      // return deserialized_connection;
     });
   })
 }

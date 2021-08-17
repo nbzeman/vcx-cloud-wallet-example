@@ -215,6 +215,7 @@ async function sendCloudWalletRESTMessage(endpoint, body){
     }
   })
   console.log(post);
+  return post.response;
 }
 // starts webhook tunnel on ngrok
 async function startWebhook(port){
@@ -229,7 +230,7 @@ async function startWebhook(port){
   app.post('/webhook', async (req, res) => {
     const sessionId = req.params.sessionId
     console.log(`Got message from webhook : `);
-    console.log(req.body);
+    console.log(JSON.stringify(req.body));
     let message = req.body;
     // insert logic to handle webhook messages
     switch (message['@type']) {
@@ -285,7 +286,8 @@ async function startWebhook(port){
         let cloud_invite_data = {
           "protocol":"standard",
           "name":"Connection Name",
-          "connection_invite":invite
+          "connection_invite":invite,
+          "thid":message['~thread'].thid
         }
         await sendCloudWalletRESTMessage('accept_invite',cloud_invite_data);
         break
@@ -299,8 +301,23 @@ async function startWebhook(port){
       case 'did:sov:BzCbsNYhMrjHiqZDTUASHg;spec/trust_ping/1.0/sent-response':
         break
       case 'did:sov:BzCbsNYhMrjHiqZDTUASHg;spec/issue-credential/1.0/sent':
+        if(message.msg.hasOwnProperty('credential_preview')){
+          console.log('credential offer preview');
+          // let json_message = JSON.parse(message);
+          // console.log((message["~thread"]['thid']));
+          let thid = message['~thread']['thid'];
+          let body = {
+            "thid":thid,
+            "message":"msg"
+          }
+          console.log(body);
+          let cloudWalletResponse = await sendCloudWalletRESTMessage('receive_credentials',body);
+          res.send(cloudWalletResponse);
+          
+        }
         if (message.msg.hasOwnProperty('credentials~attach')) {
           // credOfferResolve();
+          console.log('credential offer generated');
         }
         break
       default:
