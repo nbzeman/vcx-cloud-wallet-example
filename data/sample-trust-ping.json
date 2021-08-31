@@ -1,0 +1,7 @@
+{
+  "responseSent":false,
+  "relationship":"9py27KgzJbvwa5CAxNrwDm",
+  "@type":"did:sov:BzCbsNYhMrjHiqZDTUASHg;spec/trust_ping/1.0/sent-response",
+  "@id":"7d931793-ebc8-4a61-9f04-93fcbdc0057a",
+  "~thread":{"thid":"c236e82e-dc76-4acd-aa83-8b8706241942",
+    "received_orders":{"94bXh5LzTEvJ6BCucsGyx3":0}}}

@@ -15,7 +15,7 @@ WALLET_NAME=LIBVCX_SDK_WALLET
 WALLET_KEY=12345
 RESTENDPOINT=http://localhost:80/api/v1/
 SUPERVISOR=vcx-cloud-wallet.js
-WEBHOOK=vcx-webhook-response-ngrok.js
+WEBHOOK=vcx-webhook-response-oob.js
 ## Only for debugging
 #IGNORE_PROCESS_ERRORS=true
 VERITY_URL=https://vas.pps.evernym.com

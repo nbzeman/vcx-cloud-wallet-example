@@ -5,8 +5,13 @@ const ngrok = require('ngrok');
 const express = require('express');
 const bodyParser = require('body-parser');
 const uuid4 = require('uuid4');
+const qr = require("qrcode");
 const cloudWalletEndpoint = process.env.RESTENDPOINT;
 
+// Maps
+// Relationship create
+const relCreateMap = new Map();
+let tempRelationship="";
 async function setupIssuer(){
   sendVerityRESTMessage('123456789abcdefghi1234', 'issuer-setup', '0.6', 'create', {});
 }
@@ -16,131 +21,44 @@ async function schemaCreate(schemaMessage){
 async function credDefCreate(credDefMessage){
   sendVerityRESTMessage('123456789abcdefghi1234', 'write-cred-def', '0.6', 'write', credDefMessage);
 }
-async function relationshipCreate(relationshipCreateMessage){
-  sendVerityRESTMessage('123456789abcdefghi1234', 'relationship', '1.0', 'create', relationshipCreateMessage);
+async function relationshipCreateOfferCred(relationshipCreateMessage){
+  const issueRelationshipCreateMessage = {}
+  const issueRelThreadId = uuid4()
+  const issueRelationshipCreate =
+    new Promise(function (resolve, reject) {
+      relCreateMap.set(issueRelThreadId, resolve)
+    })
+  // sendVerityRESTMessage('123456789abcdefghi1234', 'relationship', '1.0', 'create', relationshipCreateMessage);
+  sendVerityRESTMessage('123456789abcdefghi1234', 'relationship', '1.0', 'create', issueRelationshipCreateMessage, issueRelThreadId);
+  const issueRelationshipDid = await issueRelationshipCreate;
+  let credMessage ={
+    "~for_relationship": issueRelationshipDid,
+    "comment": relationshipCreateMessage.comment,
+    "auto_issue": true,
+    "by_invitation": true,
+    "cred_def_id": relationshipCreateMessage.cred_def_id,
+    "credential_values":relationshipCreateMessage.credential_values,
+    "price": "0",
+    "@type": "did:sov:BzCbsNYhMrjHiqZDTUASHg;spec/issue-credential/1.0/offer",
+    "@id":issueRelThreadId
+  }
+  credentialOffer(credMessage);
 }
 async function relationshipCreateSMS(relationshipCreateMessage){
-  sendVerityRESTMessage('123456789abcdefghi1234', 'relationship', '1.0', 'create', relationshipCreateMessage);
+  sendVerityRESTMessage('123456789abcdefghi1234', 'relationship', '1.0', 'create', issueRelationshipCreateMessage,issueRelThreadId);
 }
 async function relationshipInvitation(relationshipInvitationMessage, relThreadId){
   sendVerityRESTMessage('123456789abcdefghi1234', 'relationship', '1.0', 'connection-invitation', relationshipInvitationMessage, relThreadId);
 }
-async function relationshipInvitationSMSOob(relationshipInvitationMessage, relThreadId){
+async function relationshipInvitationOob(relationshipInvitationMessage, relThreadId){
   sendVerityRESTMessage('123456789abcdefghi1234', 'relationship', '1.0', 'out-of-band-invitation', relationshipInvitationMessage, relThreadId);
 }
 async function credentialOffer(credentialMessage){
   sendVerityRESTMessage('BzCbsNYhMrjHiqZDTUASHg', 'issue-credential', '1.0', 'offer', credentialMessage);
 }
-
-
-
-// async function webhookResponses() {
-//   // vars for resolves on VAS
-//   var webhookResolve;
-//   var setupResolve;
-//   var schemaResolve;
-//   var credDefResolve;
-//   var relCreateResolve = {};
-//   var relInvitationResolve;
-//   var connectionResolve;
-//   var credOfferResolve;
-
-//   // STEP 2 - Setup Issuer
-//   const setupIssuer =
-//     new Promise(function (resolve, reject) {
-//       setupResolve = resolve
-//       sendVerityRESTMessage('123456789abcdefghi1234', 'issuer-setup', '0.6', 'create', {})
-//     })
-//   const [issuerDid, issuerVerkey] = await setupIssuer
-//   // Automatic registration of DID/Verkey as Endorser using Sovrin SelfServe portal
-//   const sovrinResponse = await registerDid(issuerDid, issuerVerkey)
-//   console.log(`DID registration response from Sovrin SelfServe portal:\n${sovrinResponse.data.body}`)
-
-//   // STEP 3 - Create schema
-//   const schemaMessage = {
-//     name: 'Diploma ' + uuid4().substring(0, 8),
-//     version: '0.1',
-//     attrNames: ['name', 'degree']
-//   }
-//   const schemaCreate =
-//     new Promise(function (resolve, reject) {
-//       schemaResolve = resolve
-//       sendVerityRESTMessage('123456789abcdefghi1234', 'write-schema', '0.6', 'write', schemaMessage)
-//     })
-//   const schemaId = await schemaCreate;
-//   console.log(`Created schema: ${schemaId}`);
-
-//   // STEP 4 - Create credential definition
-//   const credDefMessage = {
-//     name: 'Trinity College Diplomas',
-//     schemaId: schemaId,
-//     tag: 'latest'
-//   }
-//   const credDefCreate =
-//     new Promise(function (resolve, reject) {
-//       credDefResolve = resolve
-//       sendVerityRESTMessage('123456789abcdefghi1234', 'write-cred-def', '0.6', 'write', credDefMessage)
-//     })
-//   const credDefId = await credDefCreate
-//   console.log(`Created credential definition: ${credDefId}`)
-
-//   // STEP 5 - Relationship creation
-//   // create relationship key
-//   const relationshipCreateMessage = {
-//     label: 'Trinity College',
-//     logoUrl: 'https://robohash.org/65G.png'
-//   }
-//   const relationshipCreate =
-//     new Promise(function (resolve, reject) {
-//       relCreateResolve = resolve
-//       sendVerityRESTMessage('123456789abcdefghi1234', 'relationship', '1.0', 'create', relationshipCreateMessage)
-//     })
-//   const [relationshipDid, relThreadId] = await relationshipCreate
-//   // create invitation
-//   const relationshipInvitationMessage = {
-//     '~for_relationship': relationshipDid
-//   }
-//   const relationshipInvitation =
-//     new Promise(function (resolve, reject) {
-//       relInvitationResolve = resolve
-//       sendVerityRESTMessage('123456789abcdefghi1234', 'relationship', '1.0', 'connection-invitation', relationshipInvitationMessage, relThreadId)
-//     })
-//   const inviteUrl = await relationshipInvitation;
-//   console.log(`Invite URL is:\n${inviteUrl}`);
-//   await QR.toFile('qrcode.png', inviteUrl);
-//   // establish connection
-//   console.log('Open file qrcode.png and scan it with ConnectMe app')
-//   const connection =
-//     new Promise(function (resolve, reject) {
-//       connectionResolve = resolve
-//     })
-//   await connection;
-
-//   // STEP 6 - Credential issuance
-//   const credentialData = {
-//     name: 'Joe Smith',
-//     degree: 'Bachelors'
-//   }
-//   const credentialMessage = {
-//     '~for_relationship': relationshipDid,
-//     name: 'Diploma',
-//     cred_def_id: credDefId,
-//     credential_values: credentialData,
-//     price: 0,
-//     comment: 'Diploma',
-//     auto_issue: true
-//   }
-//   const credentialOffer =
-//     new Promise(function (resolve, reject) {
-//       credOfferResolve = resolve
-//       sendVerityRESTMessage('BzCbsNYhMrjHiqZDTUASHg', 'issue-credential', '1.0', 'offer', credentialMessage)
-//     })
-//   await credentialOffer;
-// }
-
-// Run the response code
-// webhookResponses();
-
+async function smsCredentialOfferOob(credentialMessage, relThreadId){
+  sendVerityRESTMessage('123456789abcdefghi1234', 'relationship', '1.0', 'sms-out-of-band-invitation', credentialMessage, relThreadId);
+}
 
 // create ngrok tunnel
 async function ngrokConnection(port){
@@ -193,9 +111,14 @@ async function sendVerityRESTMessage (qualifier, msgFamily, msgFamilyVersion, ms
   // Add @type and @id fields to the message
   // Field @type is dinamycially constructed based on the function arguments and added into the message payload
   message['@type'] = `did:sov:${qualifier};spec/${msgFamily}/${msgFamilyVersion}/${msgName}`
-  message['@id'] = uuid4()
+  if(message['@type'] != "did:sov:123456789abcdefghi1234;spec/relationship/1.0/sms-out-of-band-invitation"){
+    message['@id'] = uuid4();
+  }
   if (!threadId) {
-    threadId = uuid4()
+    threadId = uuid4();
+  }
+  if(message['@type'] == "did:sov:123456789abcdefghi1234;spec/relationship/1.0/sms-out-of-band-invitation"){
+    threadId="";
   }
   let url = `${process.env.VERITY_URL}/api/${process.env.DOMAIN_DID}/${msgFamily}/${msgFamilyVersion}/${threadId}`;
   console.log(`Posting message to ${url}`)
@@ -240,12 +163,19 @@ async function startWebhook(port){
     let message = req.body;
     // insert logic to handle webhook messages
     switch (message['@type']) {
+      case 'did:sov:123456789abcdefghi1234;spec/relationship/1.0/sms-invitation-sent':
+        console.log("SMS invitation was sent");
+        break
       case 'did:sov:123456789abcdefghi1234;spec/configs/0.6/COM_METHOD_UPDATED':
         // console.log(`The webhook endpoint for this domainDID has been updated');
         break;
       case 'did:sov:123456789abcdefghi1234;spec/issuer-setup/0.6/public-identifier-created':
         console.log('Issuer Generated for the domainDID');
         setupIssuer();
+        break
+      case "did:sov:BzCbsNYhMrjHiqZDTUASHg;spec/trust_ping/1.0/sent-response":
+        console.log("Trust Ping Response Sent");
+        //send verity REST API Credential Offer from relationship
         break
       case 'did:sov:123456789abcdefghi1234;spec/issuer-setup/0.6/problem-report':
         // console.log ('Issuer has already been Initiated for this domainDID)
@@ -271,23 +201,33 @@ async function startWebhook(port){
         console.log('credential def is being written to the ledger');
         // credDefResolve(message.credDefId);
         break
+      case 'did:sov:123456789abcdefghi1234;spec/relationship/1.0/out-of-band-invitation':
+        console.log('Out Of Band Relationship has been created. A Credential offer is now being generated.');
+        // relationshipInvitationOob(relationship_data, message['~thread'].thid);
+      break
       case 'did:sov:123456789abcdefghi1234;spec/relationship/1.0/created':
-        console.log('Relationship has been created');
-        let relationship_data = {
+        // relCreateMap.get(threadId)(message.did);
+        tempRelationship=message.did;
+        console.log('A Relationship has been created. A Credential offer is now being generated.');
+        let credMessage ={
           "~for_relationship": message.did,
-          "@type": "did:sov:123456789abcdefghi1234;spec/relationship/1.0/connection-invitation",
+          "comment": "Some comment",
+          "auto_issue": true,
+          "by_invitation": true,
+          "cred_def_id": "8Rpq313txDz77uQpGnkdsZ:3:CL:204156:test",
+          "credential_values": { "firstname": "nicholas", "lastname": "zeman", "dob": "12/23/72" },
+          "price": "0",
+          "@type": "did:sov:BzCbsNYhMrjHiqZDTUASHg;spec/issue-credential/1.0/offer",
           "@id":message.id
-      }
-      // relationshipInvitation(relationship_data, message['~thread'].thid);
-      relationshipInvitationSMSOob(relationship_data, message['~thread'].thid);
+        }
+        credentialOffer(credMessage);
       break
       case 'did:sov:123456789abcdefghi1234;spec/relationship/1.0/invitation':
-        console.log('Relationship invitation has been created');
-        // relInvitationResolve(message.inviteURL);
+        console.log('standard Relationship invitation has been created');
         const fetch_invite = await axios.get(message.inviteURL);
         const invite = fetch_invite.data;
         console.log('invite JSON : ');
-        console.log(invite);
+        console.log(JSON.stringify(invite));
         // send invite data to Verity 1 /accept invite
         let cloud_wallet_url = cloudWalletEndpoint+'accept_invite';
         let cloud_invite_data = {
@@ -296,7 +236,21 @@ async function startWebhook(port){
           "connection_invite":invite,
           "thid":message['~thread'].thid
         }
-        await sendCloudWalletRESTMessage('accept_invite',cloud_invite_data);
+        // await sendCloudWalletRESTMessage('accept_invite',cloud_invite_data);
+        break
+      case 'did:sov:BzCbsNYhMrjHiqZDTUASHg;spec/issue-credential/1.0/protocol-invitation':
+        console.log("Issue Credential Protocol Invitation Received");
+        console.log("Short URL Invite:");
+        console.log(message.shortInviteURL);
+        // qr.toFile(`../data/new-cred-invite.png`, message.shortInviteURL);
+        let oob_sms_data ={
+            "~for_relationship": tempRelationship,
+            "@type": "did:sov:123456789abcdefghi1234;spec/relationship/1.0/sms-out-of-band-invitation",  
+            "phoneNumber": "+17073436737",
+            "goalCode":message.shortInviteURL,
+            "goal":"this is a deep link for SMS"
+        }
+        smsCredentialOfferOob(oob_sms_data, message['~thread'].thid);
         break
       case 'did:sov:BzCbsNYhMrjHiqZDTUASHg;spec/connections/1.0/request-received':
         console.log('connection request received');
@@ -306,6 +260,7 @@ async function startWebhook(port){
         // connectionResolve(null);
         break
       case 'did:sov:BzCbsNYhMrjHiqZDTUASHg;spec/trust_ping/1.0/sent-response':
+        console.log("Trust Ping Sent Response");
         break
       case 'did:sov:BzCbsNYhMrjHiqZDTUASHg;spec/issue-credential/1.0/sent':
         if(message.msg.hasOwnProperty('credential_preview')){
@@ -331,6 +286,11 @@ async function startWebhook(port){
         console.log(`Unexpected message type ${message['@type']}`)
         process.exit(1)
     }
+  })
+  app.post("api/v1/offer-credential", async function (req, res){
+
+    console.log(req.body);
+    await relationshipCreateOfferCred(req.body);
   })
   server.listen(port, () => {
     console.log(`Listening on port ${port}`);

@@ -43,7 +43,7 @@ COPY install/* /root/install/
 COPY config/* /root/config/
 COPY data/* /root/data/
 COPY server/* /root/server/
-COPY web/ /root/web/
+COPY web/* /var/www/html/
 
 
 EXPOSE 3000

@@ -15,6 +15,6 @@ GENESIS_FILE_URL="https://raw.githubusercontent.com/sovrin-foundation/sovrin/sta
 WALLET_NAME=LIBVCX_SDK_WALLET
 WALLET_KEY=12345
 RESTENDPOINT=localhost:8080
-SUPERVISOR=vcx-webhook-response.js
+SUPERVISOR=vcx-webhook-oob.js
 ## Only for debugging
 #IGNORE_PROCESS_ERRORS=true
