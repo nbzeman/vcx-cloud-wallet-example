@@ -355,6 +355,18 @@ app.post('/api/v1/accept_invite', async function(req,res){
   }
 })
 
+// OOB Proof Request
+app.post(`/api/v1/oob_proof_request`,async function (req,res){
+  let proof_data = req.body;
+  let oob_connection = await makeOutOfBandConnection(re.body.source_id,true);
+  let proof = Proof.create(proof_data);
+  await proof.set_connection(oob_connection);
+  // insert polling here
+
+  // polling is done
+  
+})
+
 // OOB Connection
 async function makeOutOfBandConnection(type = 'QR', source_id, usePublicDid) {
   const connection = await Connection.createOutofband({ id: source_id, handshake: true });
