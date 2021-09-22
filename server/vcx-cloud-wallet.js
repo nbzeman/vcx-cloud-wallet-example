@@ -359,12 +359,23 @@ app.post('/api/v1/accept_invite', async function(req,res){
 app.post(`/api/v1/oob_proof_request`,async function (req,res){
   let proof_data = req.body;
   let oob_connection = await makeOutOfBandConnection(re.body.source_id,true);
+  // poll for oob connection first
+  let state = 0;
+  let timer =0;
+  while(state != 4 && timer < 100){
+      sleep(2000);
+      timer +=1;
+      await oob_connection.updateState();
+      state = await oob_connection.getState();
+      console.log("Connection State is :::");
+      console.log(state);
+  }
+  timer = 0;
+  // polling for oob_proof req
   let proof = Proof.create(proof_data);
+  let proof_request = await proof.getProofRequestAttachment();
   await proof.set_connection(oob_connection);
-  // insert polling here
 
-  // polling is done
-  
 })
 
 // OOB Connection
