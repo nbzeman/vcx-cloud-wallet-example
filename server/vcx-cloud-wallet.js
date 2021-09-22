@@ -3,6 +3,7 @@
 // Works as an automated cloud version of Connect.Me, using a REST API as a message transport to prompt the Credential Exchange
 
 // imports
+const mysql = require("mysql");
 const axios = require('axios');
 var request = require('request');
 var cors = require('cors');
@@ -16,12 +17,15 @@ let complete = false;
 // set up app express server
 const PORT = 5050;
 const app = express();
+const sessions = {};
 app.use(session({secret: "SecretKey"}));
 app.use(bodyParser.urlencoded({ extended: false }));
 const server = require('http').Server(app);
 const io = require('socket.io')(server);
 var vcx = require('node-vcx-wrapper');
+const uuid4 = require("uuid4");
 let connection_id = 0;
+
 const {
   Schema,  
   DisclosedProof,
@@ -35,6 +39,7 @@ const {
   defaultLogger,
   rustAPI
 } = vcx;
+
 // sockets.io listen
 io.on('connection',socket=>{
     socket.on('disconnect',()=>{
@@ -43,16 +48,25 @@ io.on('connection',socket=>{
         console.log(data);
     })
 })
+
 // express server listen
 server.listen(PORT,function(){
     console.log(`Listening on Port ${PORT}`);
 });
+
 // app settings for json, url, cors, and a public folder for shared use
 app.use(express.json());
 // express use url encoded for post messages
 app.use(express.urlencoded());
 // express set up Cross Origin
 app.use(cors());
+
+// initialize database and build table if it doesn't exist
+async function init(){
+  let db = await databaseConnect();
+  await createConnectionsTable(db);
+}
+init();
 
 // listen for credential offers
 async function credentialOfferListen(){
@@ -78,25 +92,21 @@ async function credentialOfferListen(){
   })
 }
 
-// Begin Listening for Offers
-// credentialOfferListen();
-
-
 async function getOffers(connection){
-  console.log("des connection = "+ connection);
+  console.log("deserialized connection = " + JSON.stringify(connection));
   let offers = await Credential.getOffers(connection);
   while(offers.length < 1){
-      sleep(5000);
+      // sleep(50);
       offers = await Credential.getOffers(connection);
       console.log("Credential Offers Below:");
       console.log(JSON.stringify(offers[0]));
-      io.emit('recipient_news',{conn: JSON.stringify(offers[0])});
+      // io.emit('recipient_news',{conn: JSON.stringify(offers[0])});
   }
   let credential = await Credential.create({ sourceId: 'enterprise', offer: JSON.stringify(offers[0]), connection: connection});
   await credential.sendRequest({ connection: connection, payment: 0});
   let credentialState = await credential.getState();
   while (credentialState !== StateType.Accepted) {
-    sleep(5000);
+    sleep(50);
     await credential.updateState();
     credentialState = await credential.getState();
     console.log(`Credential state is : ${credentialState}`);
@@ -128,6 +138,7 @@ app.get(`/api/v1/file_list`,async function(req,res){
         res.send(file_list);
     });
   })
+
 // Enterprise issue proof request
 app.post(`/api/v1/request_proof`, async function(req,res){
     // receive body of request
@@ -260,15 +271,7 @@ app.post(`/api/v1/receive_proof_request`, async function(req,res){
 
 })
 
-
-
-//Offer Credentials
-
-
-// Connections
-
 // Get Connection Invite //
-
 app.post('/api/v1/get_invite', async function(req,res){
   const {protocol, type, name, phonenumber} = req.body ;
   let state = 0;
@@ -331,39 +334,28 @@ app.post('/api/v1/get_invite', async function(req,res){
   }
 })
 
-// Accept Connection Invite //
+// Server Check
+app.get('/api/v1/health_check', async function(req,res){
+  res.send('cloud wallet server is running');
+}) 
 
+// Accept Connection Invite //
 app.post('/api/v1/accept_invite', async function(req,res){
   let timer =0;
-  const {protocol, connection_invite, name} = req.body ;
+  const {protocol, connection_invite, name, thid} = req.body ;
   let invite = JSON.stringify(connection_invite);
   console.log("Accepting Connection Invite");
   console.log(invite);
   let connection = {};
   if (protocol === "standard"){
     let data = '{"connection_type":"SMS","phone":"5555555555"}';// dummy legacy data must be included
-    connection = await Connection.acceptConnectionInvite({"id":name,"invite": invite,"data":data});
+    connection = await acceptConnectionInvite(name, invite, thid);
   }else if (protocol === "outOfBand"){
     connection = await makeOutOfBandConnection("QR","connection-sourceId",true);
   }
-  let state = 0;
-  while(state != 4 && state != 8 && timer < 100){
-      sleep(2000);
-      timer +=1;
-      await connection.updateState();
-      state = await connection.getState();
-      console.log("State is :::");
-      console.log(state);
-  }
-  timer = 0;
-  let serialized_connection = await connection.serialize();
-  // store connection locally (upgrade to mysql soon!!)
-  await fs.writeJSON(`../data/${name}-connection.json`,serialized_connection);
-  res.send("Connection Accepted:: " + JSON.stringify(serialized_connection) );
-  timer = 0;
-
 })
 
+// OOB Connection
 async function makeOutOfBandConnection(type = 'QR', source_id, usePublicDid) {
   const connection = await Connection.createOutofband({ id: source_id, handshake: true });
   const connectionData = { id: source_id, connection_type: type, use_public_did: usePublicDid, update_agent_info: true };
@@ -372,166 +364,215 @@ async function makeOutOfBandConnection(type = 'QR', source_id, usePublicDid) {
   return connection;
 }
 
-// Credentials
-
-// Offer Credential
-
-app.post('/api/v1/offer_credential', async function(req,res){
-  console.log(req.body);
-  const {user_type, connection, credential_name} = req.body;
-  // user_type = "mobile", "cloud", "email"
-  if(user_type==="mobile"){
-      let connection = await vcxwebtools.makeConnection('QR','connection_1',req.body['phonenumber'],true);
-      let qrcode = qr.image(await connection.inviteDetails(true), { type: 'png' });
-      res.setHeader('Content-type', 'image/png');
-      res.writeHead(200, {'Content-Type': 'image/png'});
-      qrcode.pipe(res);
-      io.emit("connection waiting");
-      let timer = 0;
-      while(state != 4 && state != 8 && timer < 100){
-          sleep(2000);
-          await connection.updateState();
-          state = await connection.getState();
-          console.log("State is :::");
-          console.log(state);
-      }
-      timer =0;
-      if(state===8){
-        console.log("Connection Redirected");
-      }
-  }else if(user_type==="cloud"){
-
-
-  }
-  // 
-  while(state != 4 && state != 8 && timer < 250) {
-      console.log("The State of the Connection is "+ state + " "+timer);
-      await sleep(2000);
-      await connection.updateState();
-      state = await connection.getState();
-      timer+=1;
-  }
-  timer=0;
-  // check for expiration or acceptance
-  if(state == 4){
-      timer = 0;
-      console.log(`Connection Accepted! Connection ID is : ${connection_id}`);
-      io.emit('connection ready');
-      connection_id+=1;
-      await vcxwebtools.storeConnection(connection, connection_id);
-      console.log(` connection ID is :  ${connection_id}`);
-    // reset global timeout
-    timer = 0;
-    io.emit('credential offered');
-    let cred = await vcxwebtools.offerCredential(credential_name,connection);
-    if(cred){
-      io.emit('credential issued');
-      complete=true;
-    }
-  }else if(state == 8){//check for redirected state
-    timer = 0;
-    console.log("Connection Redirected!");
-    await connection.updateState();
-    state = await connection.getState();
-    io.emit('connection ready');
-    // reset global timeout
-    timer = 0;
-    io.emit('credential offered');
-    // get the redirect details
-    let redirected_details = await connection.getRedirectDetails();
-    // search and return name of Connection data with matching public DID
-    let redirected_connection = await vcxwebtools.searchConnectionsByTheirDid(redirected_details);
-    // deserialize connection return
-    console.log(redirected_connection);
-    // offer cred to old connection
-    if(redirected_connection != false){
-      let cred = await vcxwebtools.offerCredential(credential_name,redirected_connection);
-      if(cred){
-        io.emit('credential issued');
-      }
-    }else{
-      io.emit('connection not found');
-    }
-    complete=true;
-  }
-  })
-
-
-// Proofs
-
-// Enterprise Offer Credentials
-
-app.post(`/api/v1/offer_enterprise_credentials`, async function(req,res){
-  console.log(req.body);
-  let cred_name = req.body['credential'];
-  let endpoint = req.body['endpoint'];
-  let connection = await vcxwebtools.makeConnection('QR','enterprise_connection','000');
-  let details = await connection.inviteDetails(true);
-  console.log(details);
-  console.log(endpoint);
-  axios({
-    method: 'post',
-    url: `${endpoint}/api/v1/receive_credentials`,
-    data:details,
-    headers: {
-        'Content-Type': 'application/json'
-    }
-  });
-  // Poll for successful Connection
-  let state = await connection.getState();
-  while(state != StateType.Accepted) {
-      console.log("The State of the Connection is "+ state);
-      await connection.updateState();
-      state = await connection.getState();
-  }
-  vcxwebtools.offerCredential(cred_name,connection);
-})
-
 // Enterprise Receive Credentials
-
 app.post(`/api/v1/receive_credentials`, async function(req,res){
      //get details
-     console.log("ACCEPTING REQUEST...");
-     console.log(req.body);
-     let invite = JSON.stringify(req.body);
-     console.log(invite);
-     let data = '{"connection_type":"SMS","phone":"5555555555"}';// dummy legacy data must be included
-     let connection = await Connection.acceptConnectionInvite({"id":"name","inviter": invite,"data":data});
-     console.log('Connection Invite Accepted');
-     await connection.updateState();
-     let state = await connection.getState();
-     while(state != StateType.Accepted){
-         await connection.updateState();
-         state = await connection.getState();
-         console.log("State is :::");
-         console.log(state);
-     }
-     io.emit('recipient_news',{connection:`Credential offers from ${inviter} are :`});
-     let serialized_connection = await connection.serialize();
-     // store connection locally (upgrade to mysql soon!!)
-     await fs.writeJSON(`../data/${invite.label}-connection.json`,serialized_connection);
-     timer = 0;
-     let offers = await Credential.getOffers(connection);
-     while(offers.length < 1){
-         offers = await Credential.getOffers(connection);
-         console.log("Credential Offers Below:");
-         console.log(JSON.stringify(offers[0]));
-         io.emit('recipient_news',{connection: JSON.stringify(offers[0])});
-     }
-     let credential = await Credential.create({ sourceId: 'enterprise', offer: JSON.stringify(offers[0]), connection: connection});
-     await credential.sendRequest({ connection: connection, payment: 0});
-     let credentialState = await credential.getState();
-     while (credentialState !== StateType.Accepted) {
-       sleep(2);
-       await credential.updateState();
-       credentialState = await credential.getState();
-       console.log(`Credential state is : ${credentialState}`);
-     }
-     let serial_cred = await credential.serialize();
-     console.log(serial_cred);
-     //await fs.writeJSON(`./data/received-credential.json`,serial_cred);
-     //io.emit('recipient_news',{connection:`Credential Accepted`});
+     console.log("ACCEPTING INCOMING CREDENTIAL REQUEST...");
+     console.log(JSON.stringify(req.body));
+     let thid = req.body['thid'];
+     let serial_connection;
+     let connection;
+     console.log(`querying mysql database for ${thid} data`);
+     // query mysql for serialized connection
+     let db = await databaseConnect();
+     db.connect(async function(err){
+      if (err) {
+        return console.error('error: ' + err.message);
+      }
+      let sql = `SELECT connection_data FROM connections WHERE thid = '${thid}'`;
+      console.log(sql);
+      await db.query(sql, async function (error, results, fields) {
+         if (error) {return console.error(error.message)}// log db error
+         console.log(`logging the MYSQL return query:`);
+         // format results
+         str_result = await JSON.stringify(results[0]);
+         str_result = str_result.replace("'", "");
+         str_result = str_result.replace(`RowDataPacket`, `"RowDataPacket`);
+         str_result = str_result.replace(`connection_data:`, `"connection_data`);
+         let json_result = await JSON.parse(str_result);
+         serial_connection = json_result['connection_data'];
+         console.log(serial_connection);
+         let json_connection = await JSON.parse(serial_connection);
+         let deserialized_connection = await Connection.deserialize(json_connection);
+        //  io.emit('recipient_news',{connection:`Credential offers from ${inviter} are :`});
+         // retrieve connection from database
+         timer = 0;
+         let offers = await Credential.getOffers(deserialized_connection);
+         console.log("about to loop for cred offers");
+         while(offers.length < 1){
+             console.log("Getting Credential Offers");
+             offers = await Credential.getOffers(deserialized_connection);
+             console.log("Credential Offers Below:");
+             console.log(JSON.stringify(offers[0]));
+             io.emit('recipient_news',{deserialized_connection: JSON.stringify(offers[0])});
+         }
+         let credential = await Credential.create({ sourceId: 'enterprise', offer: JSON.stringify(offers[0]), connection: deserialized_connection});
+         await credential.sendRequest({ connection: deserialized_connection, payment: 0});
+         let credentialState = await credential.getState();
+         while (credentialState !== StateType.Accepted) {
+           sleep(2);
+           await credential.updateState();
+           credentialState = await credential.getState();
+           console.log(`Credential state is : ${credentialState}`);
+         }
+         let serial_cred = await credential.serialize();
+         console.log(serial_cred);
+         let rando = uuid4();
+         await fs.writeJSON(`/root/data/${rando}-received-credential.json`,serial_cred);
+         res.send("credential flow completed");
+         //io.emit('recipient_news',{connection:`Credential Accepted`});
+       })
+    });
 })
+
+// return mysql connection
+async function databaseConnect(){
+  let db = mysql.createConnection({
+      host: process.env.WALLET_HOST,
+      user: process.env.WALLET_USERNAME,
+      password: process.env.WALLET_PASSWORD,
+      database: process.env.WALLET_DB_NAME
+  });
+  return db;
+}
+
+// create table Conneciton if it doesn't exist
+async function createConnectionsTable(db){
+  db.connect(function(err) {
+    if (err) {
+      return console.error('error: ' + err.message);
+    }
+    let createConnections = `create table if not exists connections(
+                            id int primary key auto_increment,
+                            pw_did varchar(255) not null,
+                            thid varchar(255) not null,
+                            connection_data json not null)`;
+    db.query(createConnections, function(err, results, fields) {
+      if (err) {
+        console.log(err.message);
+      }
+    });
+    db.end(function(err) {
+      if (err) {
+        return console.log(err.message);
+      }
+    });
+  })
+}
+
+// store connection into msql database
+async function storeConnectionMysql(db, serialized_connection, thid){
+  db.connect(function(err) {
+    if (err) {
+      return console.error('error: ' + err.message);
+    }
+  })
+  let post = { "thid":thid, "pw_did": serialized_connection.data.their_pw_did, "connection_data": JSON.stringify(serialized_connection) };
+  let sql = "INSERT INTO connections SET ?";
+  let query = db.query(sql, post, (err) => {
+    if (err) {
+      throw err;
+    }else{
+      console.log(`connection stored as thid ${thid}`);
+      console.log(`connection stored as thid ${serialized_connection.data.their_pw_did}`);
+    }
+  })
+  return thid;
+}
+
+// return (deserialized) connection from accepted invite
+async function acceptConnectionInvite(name, invite, thid){
+  let data = '{"connection_type":"SMS","phone":"5555555555"}';// dummy legacy data must be included
+  let connection = await Connection.acceptConnectionInvite({"id":name,"invite": invite,"data":data});
+  let state = 0;
+  let timer =0;
+  while(state != 4 && state != 8 && timer < 100){
+      sleep(2000);
+      timer +=1;
+      await connection.updateState();
+      state = await connection.getState();
+      console.log("Connection State is :::");
+      console.log(state);
+  }
+  timer = 0;
+  let serialized_connection = await connection.serialize();
+  console.log('serialized connection: '+JSON.stringify(serialized_connection));
+  // connect to mysql db and then write connection to table
+  let db = await databaseConnect();
+  // await createConnectionsTable(db);
+  await storeConnectionMysql(db, serialized_connection, thid);
+  timer = 0;
+  let response = {
+    "DID":serialized_connection.data.pw_did,
+    "thid":thid
+  }
+  return connection;
+}
+
+//returns a connection data from the did given
+app.post(`/api/v1/returnConnectionFromWallet`, async function (req, res){
+  let pw_did = req.body['pw_did'];
+  let db = await databaseConnect();
+  db.connect(function(err){
+    if (err) {
+      return console.error('error: ' + err.message);
+    }
+    let sql = `SELECT connection_data FROM connections WHERE pw_did = '${pw_did}'`;
+    console.log(sql);
+    db.query (sql, async (error, results, fields) => {
+      if (error) {
+        return console.error(error.message);
+    }
+    console.log(`logging the  mysql return query:`);
+    // format results
+    str_result = await JSON.stringify(results[0]);
+    str_result=str_result.replace("'","");
+    // json_result=json_result.replace("[","");
+    // json_result=json_result.replace("]","");
+    str_result=str_result.replace(`RowDataPacket`,`"RowDataPacket`);
+    str_result=str_result.replace(`connection_data:`,`"connection_data"`);
+    let json_result = await JSON.parse(str_result);
+    let serial_connection = json_result['connection_data'];
+    console.log(serial_connection);
+    let str_connection = await JSON.parse(serial_connection);
+    let deserialized_connection = await Connection.deserialize(str_connection);
+    console.log(deserialized_connection);
+    res.send(str_connection);
+    });
+  })
+})
+
+// get and return serialized connection from mysql db
+async function getConnectionMysql(db,thid){
+  console.log(thid);
+  db.connect(async function(err){
+    if (err) {
+      return console.error('error: ' + err.message);
+    }
+    let sql = `SELECT connection_data FROM connections WHERE thid = '${thid}'`;
+    
+    console.log(sql);
+    await db.query (sql, async (error, results, fields) => {
+      if (error) {
+        return console.error(error.message);
+      }
+      console.log(`logging the XVX mysql return query:`);
+      // format results
+      str_result = await JSON.stringify(results[0]);
+      str_result=str_result.replace("'","");
+      // json_result=json_result.replace("[","");
+      // json_result=json_result.replace("]","");
+      str_result=str_result.replace(`RowDataPacket`,`"RowDataPacket`);
+      str_result=str_result.replace(`connection_data:`,`"connection_data`);
+      let json_result = await JSON.parse(str_result);
+      let serial_connection = json_result['connection_data'];
+      console.log(serial_connection);
+      // let str_connection = await JSON.parse(serial_connection);
+      return serial_connection;
+      });
+  })
+  
+}
 
 // Generate schema and credential definition based upon json file in ./data/cred_name-schema.json
 app.post('/api/v1/build_credential', async function(req,res){
@@ -557,6 +598,7 @@ function ExpireAll(){
       console.log('global timer expired');
   }
 }
+
 setTimeout(ExpireAll,500000);
 
 // polling killer
@@ -576,3 +618,4 @@ let timeUp = function(x){
 function sleep(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));
 }
+

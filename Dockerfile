@@ -8,6 +8,7 @@ RUN apt-get update && \
         dirmngr \
         ca-certificates  \
         curl \
+         unzip \
         software-properties-common \
         vim \
         supervisor \
@@ -19,7 +20,8 @@ RUN apt-get update && \
         g++ \
         jq \
         python3-pip \
-        pwgen
+        pwgen \
+        mysql-client
 
 #### Needed Repos
 RUN echo "deb https://repo.sovrin.org/sdk/deb bionic stable" > /etc/apt/sources.list.d/sovrin.list && \
@@ -41,7 +43,11 @@ COPY install/* /root/install/
 COPY config/* /root/config/
 COPY data/* /root/data/
 COPY server/* /root/server/
-COPY web/ /root/web/
+COPY web/* /var/www/html/
+
+
+EXPOSE 3000
+
 
 # Add Keys and Update apt-get Libraries:
 WORKDIR /root/install
@@ -54,7 +60,7 @@ RUN apt-get update && \
 RUN dpkg -i libindy_1.15*.deb
 RUN dpkg -i libsovtoken_1.0.5_amd64.deb
 RUN dpkg -i libmysqlstorage_0.1.1131_amd64.deb
-RUN dpkg -i libvcx_0.1*
+RUN dpkg -i libvcx_0.10*
 RUN apt-get install -f
 
 # NodeJS 10.x install
@@ -63,6 +69,12 @@ RUN . /etc/os-release && \
     echo "deb https://deb.nodesource.com/node_10.x ${UBUNTU_CODENAME} main" > /etc/apt/sources.list.d/nodesource.list && \
     apt-get update && \
     apt-get install -y nodejs --no-install-recommends
+# 
+
+# Install Ngrok
+RUN curl -O -s https://bin.equinox.io/c/4VmDzA7iaHb/ngrok-stable-linux-amd64.zip && \
+    unzip ngrok-stable-linux-amd64.zip && \
+    cp ngrok /usr/local/bin/.
 
 #### Cleanup
 # clean up apt lists

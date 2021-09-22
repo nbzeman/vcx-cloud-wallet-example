@@ -68,6 +68,9 @@ typings/
 # Yarn Integrity file
 .yarn-integrity
 
+# png files
+*.png
+
 # dotenv environment variables file
 .env
 .env.test

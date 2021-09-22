@@ -22,8 +22,10 @@ const {
 } = vcx;
 // load up libsovtoken
 async function run(){
+    const mysqlffi = ffi.Library('/usr/lib/libmysqlstorage.so', { mysql_storage_init: ['void', []] });
     const myffi = ffi.Library('/usr/lib/libsovtoken.so', {sovtoken_init: ['void', []]});
     await myffi.sovtoken_init();
+    await mysqlffi.mysql_storage_init();
     await vcx.initVcx(config);
     defaultLogger('debug');
 }
