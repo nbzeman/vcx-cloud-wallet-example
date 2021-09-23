@@ -1,0 +1,169 @@
+{
+	"info": {
+		"_postman_id": "afbe9799-8500-4543-9a95-a6208cde8fbc",
+		"name": "Cloud Wallet",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Offer Credentials",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": ""
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "File List",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": ""
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Health Check",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": ""
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Receive Creds (Wallet)",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": ""
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "OOB Proof Request",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n \"proof_attrs\" :[\n        {\"name\": \"name\"},\n        {\"name\": \"email\"}\n    ],\n \"proof_uuid\":\"uuid\",\n \"proof_name\":\"Person Proving\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "localhost:8080/api/v1/oob_proof_request",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"api",
+						"v1",
+						"oob_proof_request"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get Invite Copy",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"protocol\":\"standard\",\n    \"name\":\"Jimmy\",\n    \"type\":\"json\",\n    \"phonenumnber\":\"7073436737\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "localhost:8080/api/v1/get_invite",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"api",
+						"v1",
+						"get_invite"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Accept Invite",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"protocol\":\"standard\",\n    \"name\":\"nbzeman\",\n    \"connection_invite\":{\n    \"profileUrl\": \"https://i.ibb.co/b5XYr6n/logo-evernym.png\",\n    \"recipientKeys\": [\"E1pwVj9J2E1dNoNWcZwU9gxsMeBq7JM3kkQ9GmyCknUh\"],\n    \"@type\": \"did:sov:BzCbsNYhMrjHiqZDTUASHg;spec/connections/1.0/invitation\",\n    \"label\": \"SimCreditUnion2\",\n    \"serviceEndpoint\": \"https://vas.pps.evernym.com:443/agency/msg\",\n    \"routingKeys\": [\"ExPFLx4uNjF9jRQJV7XxAt8MfuXJENgbgA1qNmWznsRZ\"],\n    \"@id\": \"b693ba9c-67e9-4318-9dd3-f3c6d0349127\"\n    }\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "localhost:8081/api/v1/accept_invite",
+					"host": [
+						"localhost"
+					],
+					"port": "8081",
+					"path": [
+						"api",
+						"v1",
+						"accept_invite"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Accept Credential",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"profileUrl\": \"https://i.ibb.co/b5XYr6n/logo-evernym.png\",\n  \"recipientKeys\": [\"8ub2SMjmyzVAb5CjGLii7hcXMwDVkjDHVLPHtQRv5BQL\"],\n  \"@type\": \"did:sov:BzCbsNYhMrjHiqZDTUASHg;spec/connections/1.0/invitation\",\n  \"label\": \"Verity Example App\",\n  \"serviceEndpoint\": \"https://vas.pps.evernym.com/agency/msg\",\n  \"routingKeys\": [\"ExPFLx4uNjF9jRQJV7XxAt8MfuXJENgbgA1qNmWznsRZ\"],\n  \"@id\": \"9a30fe19-c5a3-4b2d-bf58-8d7f81f6e938\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "localhost:8081/api/v1/accept_credential",
+					"host": [
+						"localhost"
+					],
+					"port": "8081",
+					"path": [
+						"api",
+						"v1",
+						"accept_credential"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}
