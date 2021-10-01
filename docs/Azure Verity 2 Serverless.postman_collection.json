@@ -1,0 +1,446 @@
+{
+	"info": {
+		"_postman_id": "9cbc183e-6597-4358-8abc-090ee602b7bb",
+		"name": "Azure Verity 2 Serverless",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Relationship Create",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "X-API-KEY",
+						"value": "3mvtW1nhPCXNcC3y11BJ77QjXanMMaoL78JGkZ4iLGHh:3H5Tsmtb77N1jz3DBVaUfLyFtArTDFg54xLJJiwNuhvBcW9WesUNEUHUUjR14QWyD85j3DEUnqsbkPgDXJffTfhj",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"label\": \"Nicholas Zeman\",\n  \"logoUrl\":\"https://robohash.org/62005\",\n  \"@type\": \"did:sov:123456789abcdefghi1234;spec/relationship/1.0/create\",\n  \"phoneNumber\": \"+17073436737\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "https://vas.pps.evernym.com/api/XGS2Kqt3PGGPgghr1xDxJe/relationship/1.0/fe793134-7211-41b8-b418-k336c9ebafo9",
+					"protocol": "https",
+					"host": [
+						"vas",
+						"pps",
+						"evernym",
+						"com"
+					],
+					"path": [
+						"api",
+						"XGS2Kqt3PGGPgghr1xDxJe",
+						"relationship",
+						"1.0",
+						"fe793134-7211-41b8-b418-k336c9ebafo9"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Relationship Invite Copy",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "X-API-KEY",
+						"value": "3mvtW1nhPCXNcC3y11BJ77QjXanMMaoL78JGkZ4iLGHh:3H5Tsmtb77N1jz3DBVaUfLyFtArTDFg54xLJJiwNuhvBcW9WesUNEUHUUjR14QWyD85j3DEUnqsbkPgDXJffTfhj",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"~for_relationship\": \"URDDcmsXfByYG1LkN1PKL9\",\n  \"@type\": \"did:sov:123456789abcdefghi1234;spec/relationship/1.0/connection-invitation\",  \n  \"phoneNumber\": \"+17073436737\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "https://vas.pps.evernym.com/api/XGS2Kqt3PGGPgghr1xDxJe/relationship/1.0/",
+					"protocol": "https",
+					"host": [
+						"vas",
+						"pps",
+						"evernym",
+						"com"
+					],
+					"path": [
+						"api",
+						"XGS2Kqt3PGGPgghr1xDxJe",
+						"relationship",
+						"1.0",
+						""
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Relationship Invite SMS Copy",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "X-API-KEY",
+						"type": "text",
+						"value": "3mvtW1nhPCXNcC3y11BJ77QjXanMMaoL78JGkZ4iLGHh:3H5Tsmtb77N1jz3DBVaUfLyFtArTDFg54xLJJiwNuhvBcW9WesUNEUHUUjR14QWyD85j3DEUnqsbkPgDXJffTfhj"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"~for_relationship\": \"TLMjweySrhtegq15aZik4S\",\n  \"@type\": \"did:sov:123456789abcdefghi1234;spec/relationship/1.0/sms-connection-invitation\",  \n  \"phoneNumber\": \"+17073436737\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "https://vas.pps.evernym.com/api/XGS2Kqt3PGGPgghr1xDxJe/relationship/1.0/fe793134-7211-41b8-b418-c336c9ebafd9",
+					"protocol": "https",
+					"host": [
+						"vas",
+						"pps",
+						"evernym",
+						"com"
+					],
+					"path": [
+						"api",
+						"XGS2Kqt3PGGPgghr1xDxJe",
+						"relationship",
+						"1.0",
+						"fe793134-7211-41b8-b418-c336c9ebafd9"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Committed Answer Copy",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "X-API-KEY",
+						"type": "text",
+						"value": "3mvtW1nhPCXNcC3y11BJ77QjXanMMaoL78JGkZ4iLGHh:3H5Tsmtb77N1jz3DBVaUfLyFtArTDFg54xLJJiwNuhvBcW9WesUNEUHUUjR14QWyD85j3DEUnqsbkPgDXJffTfhj"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"~for_relationship\": \"2LyPEzjCpFskcbGMAo3BSA\",\n  \"text\": \"Are you there?\",\n  \"detail\": \"detail\",\n  \"valid_responses\": [ \"yes\", \"no\", \"not really sure\" ],\n  \"signature_required\": false,\n  \"@type\": \"did:sov:BzCbsNYhMrjHiqZDTUASHg;spec/committedanswer/1.0/ask-question\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "https://vas.pps.evernym.com/api/XGS2Kqt3PGGPgghr1xDxJe/committedanswer/1.0",
+					"protocol": "https",
+					"host": [
+						"vas",
+						"pps",
+						"evernym",
+						"com"
+					],
+					"path": [
+						"api",
+						"XGS2Kqt3PGGPgghr1xDxJe",
+						"committedanswer",
+						"1.0"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Issue Proof Request Copy",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "X-API-KEY",
+						"value": "3mvtW1nhPCXNcC3y11BJ77QjXanMMaoL78JGkZ4iLGHh:3H5Tsmtb77N1jz3DBVaUfLyFtArTDFg54xLJJiwNuhvBcW9WesUNEUHUUjR14QWyD85j3DEUnqsbkPgDXJffTfhj",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"@type\": \"did:sov:BzCbsNYhMrjHiqZDTUASHg;spec/present-proof/1.0/request\",\n  \"@id\": \"e3692334-2447-4184-8c03-314603793bb7\",\n  \"~for_relationship\": \"AfwFzPnvbHfs97Ji9A8oz9\",\n  \"name\": \"proof-request-1\",\n  \"proof_attrs\": [\n    {\n      \"name\": \"First name\",\n      \"self_attest_allowed\": true\n    },\n    {\n      \"name\": \"Last name\",\n      \"self_attest_allowed\": true\n    }\n  ],\n  \"proof_predicates\": [\n    {\n      \"name\": \"age\",\n      \"p_type\": \">=\",\n      \"p_value\": 18,\n      \"restrictions\": [\n        {\n          \"schema_id\": \"39YBdt6BLWLJAUPA8NvwDX:2:license:0.1\",\n          \"schema_issuer_did\": \"39YBdt6BLWLJAUPA8NvwDX\",\n          \"schema_name\": \"license\",\n          \"schema_version\": \"0.1\",\n          \"issuer_did\": \"KwgzAuJxWTZMJwfN7pbX6P\",\n          \"cred_def_id\": \"KwgzAuJxWTZMJwfN7pbX6P:3:CL:104:tag\"\n        }\n      ],\n      \"non_revoked\": {\n        \"from\": 1587674566,\n        \"to\": 1587674566\n      }\n    }\n  ],\n  \"revocation_interval\": {\n    \"from\": 1587674566,\n    \"to\": 1587674566\n  },\n  \"by_invitation\": false\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "https://vas.pps.evernym.com/api/XGS2Kqt3PGGPgghr1xDxJe/present-proof/1.0/",
+					"protocol": "https",
+					"host": [
+						"vas",
+						"pps",
+						"evernym",
+						"com"
+					],
+					"path": [
+						"api",
+						"XGS2Kqt3PGGPgghr1xDxJe",
+						"present-proof",
+						"1.0",
+						""
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Issue Credential Copy",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "X-API-KEY",
+						"value": "3mvtW1nhPCXNcC3y11BJ77QjXanMMaoL78JGkZ4iLGHh:3H5Tsmtb77N1jz3DBVaUfLyFtArTDFg54xLJJiwNuhvBcW9WesUNEUHUUjR14QWyD85j3DEUnqsbkPgDXJffTfhj",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"~for_relationship\": \"2LyPEzjCpFskcbGMAo3BSA\",\n  \"name\": \"Passport\",\n  \"cred_def_id\": \"8Rpq313txDz77uQpGnkdsZ:3:CL:194936:dev\",\n  \"credential_values\": { \"name\": \"test-name\", \"dob\": \"12/23/72 \"},\n  \"price\": \"0\",\n  \"@type\": \"did:sov:BzCbsNYhMrjHiqZDTUASHg;spec/issue-credential/1.0/offer\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "https://vas.pps.evernym.com/api/XGS2Kqt3PGGPgghr1xDxJe/issue-credential/1.0/",
+					"protocol": "https",
+					"host": [
+						"vas",
+						"pps",
+						"evernym",
+						"com"
+					],
+					"path": [
+						"api",
+						"XGS2Kqt3PGGPgghr1xDxJe",
+						"issue-credential",
+						"1.0",
+						""
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Update Webhook Copy",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "X-API-key",
+						"value": "3mvtW1nhPCXNcC3y11BJ77QjXanMMaoL78JGkZ4iLGHh:3H5Tsmtb77N1jz3DBVaUfLyFtArTDFg54xLJJiwNuhvBcW9WesUNEUHUUjR14QWyD85j3DEUnqsbkPgDXJffTfhj",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "  {\"comMethod\": {\n    \"id\": \"webhook\",\n    \"type\": 2,\n    \"value\": \"https://verity-2-webhook-report.azurewebsites.net/api/Verity-Webhook?\",\n    \"packaging\": { \"pkgType\": \"plain\" }\n  },\n  \"@type\": \"did:sov:123456789abcdefghi1234;spec/configs/0.6/UPDATE_COM_METHOD\"\n  }",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "https://vas.pps.evernym.com/api/XGS2Kqt3PGGPgghr1xDxJe/configs/0.6/",
+					"protocol": "https",
+					"host": [
+						"vas",
+						"pps",
+						"evernym",
+						"com"
+					],
+					"path": [
+						"api",
+						"XGS2Kqt3PGGPgghr1xDxJe",
+						"configs",
+						"0.6",
+						""
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Write Credential Definition Copy",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "X-API-key",
+						"type": "text",
+						"value": "3mvtW1nhPCXNcC3y11BJ77QjXanMMaoL78JGkZ4iLGHh:3H5Tsmtb77N1jz3DBVaUfLyFtArTDFg54xLJJiwNuhvBcW9WesUNEUHUUjR14QWyD85j3DEUnqsbkPgDXJffTfhj"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"name\": \"CU Member\",\n  \"schemaId\": \"8Rpq313txDz77uQpGnkdsZ:2:CU Member:2.523\",\n  \"tag\": \"test\",\n  \"revocationDetails\": {},\n  \"@type\": \"did:sov:123456789abcdefghi1234;spec/write-cred-def/0.6/write\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "https://vas.pps.evernym.com/api/XGS2Kqt3PGGPgghr1xDxJe/write-cred-def/0.6/",
+					"protocol": "https",
+					"host": [
+						"vas",
+						"pps",
+						"evernym",
+						"com"
+					],
+					"path": [
+						"api",
+						"XGS2Kqt3PGGPgghr1xDxJe",
+						"write-cred-def",
+						"0.6",
+						""
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Write Schema Copy",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "X-API-key",
+						"type": "text",
+						"value": "3mvtW1nhPCXNcC3y11BJ77QjXanMMaoL78JGkZ4iLGHh:3H5Tsmtb77N1jz3DBVaUfLyFtArTDFg54xLJJiwNuhvBcW9WesUNEUHUUjR14QWyD85j3DEUnqsbkPgDXJffTfhj"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"name\": \"CU Member Schema\",\n  \"version\": \"2.234\",\n  \"attrNames\": [ \"firstname\", \"lastname\", \"dob\" ],\n  \"@type\": \"did:sov:123456789abcdefghi1234;spec/write-schema/0.6/write\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "https://vas.pps.evernym.com/api/XGS2Kqt3PGGPgghr1xDxJe/write-schema/0.6/",
+					"protocol": "https",
+					"host": [
+						"vas",
+						"pps",
+						"evernym",
+						"com"
+					],
+					"path": [
+						"api",
+						"XGS2Kqt3PGGPgghr1xDxJe",
+						"write-schema",
+						"0.6",
+						""
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get Config Copy",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "X-API-key",
+						"value": "3mvtW1nhPCXNcC3y11BJ77QjXanMMaoL78JGkZ4iLGHh:3H5Tsmtb77N1jz3DBVaUfLyFtArTDFg54xLJJiwNuhvBcW9WesUNEUHUUjR14QWyD85j3DEUnqsbkPgDXJffTfhj",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "https://vas.pps.evernym.com/api/XGS2Kqt3PGGPgghr1xDxJe/issuer-setup/0.6",
+					"protocol": "https",
+					"host": [
+						"vas",
+						"pps",
+						"evernym",
+						"com"
+					],
+					"path": [
+						"api",
+						"XGS2Kqt3PGGPgghr1xDxJe",
+						"issuer-setup",
+						"0.6"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Issuer Setup Copy",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "X-API-key",
+						"value": "3mvtW1nhPCXNcC3y11BJ77QjXanMMaoL78JGkZ4iLGHh:3H5Tsmtb77N1jz3DBVaUfLyFtArTDFg54xLJJiwNuhvBcW9WesUNEUHUUjR14QWyD85j3DEUnqsbkPgDXJffTfhj",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "https://vas.pps.evernym.com/api/XGS2Kqt3PGGPgghr1xDxJe/issuer-setup/0.6",
+					"protocol": "https",
+					"host": [
+						"vas",
+						"pps",
+						"evernym",
+						"com"
+					],
+					"path": [
+						"api",
+						"XGS2Kqt3PGGPgghr1xDxJe",
+						"issuer-setup",
+						"0.6"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}
