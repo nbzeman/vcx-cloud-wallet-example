@@ -8,6 +8,11 @@ INSTITUTION_LOGO=${INSTITUTION_LOGO}
 ENTERPRISE_SEED=${ENTERPRISE_SEED}
 WALLET_NAME="LIBVCX_SDK_WALLET"
 WALLET_KEY="12345"
+WALLET_DB_NAME=${WALLET_DB_NAME}
+WALLET_HOST=${WALLET_HOST}
+WALLET_USERNAME=${WALLET_USERNAME}
+WALLET_PASSWORD=${WALLET_PASSWORD}
+WALLET_USE_SSL=${WALLET_USE_SSL}
 
 cd /root/config
 if [ -z "$ENTERPRISE_SEED" ];then
@@ -20,6 +25,9 @@ echo "  as Insitituion: $INSTITUTION_NAME with logo: $INSTITUTION_LOGO"
 
 # this sets up the mysql wallet
 # python3 /usr/share/libvcx/provision_agent_keys.py -v --wallet-type mysql --wallet-name "${WALLET_NAME}" --storage-config "{\"db_name\": \"$WALLET_DB_NAME\", \"port\": 3306, \"write_host\": \"$WALLET_HOST\", \"read_host\": \"$WALLET_HOST\", \"use_ssl\": $WALLET_USE_SSL}" --storage-credentials "{\"user\": \"$WALLET_USERNAME\", \"pass\" : \"$WALLET_PASSWORD\"}" \ "${AGENCY_URL}" "${WALLET_KEY}" > vcx-config.json
+
+
+# python3 /usr/share/libvcx/provision_agent_keys.py -v --wallet-type mysql --wallet-name "${WALLET_NAME}" --storage-config "{\"db_name\": \"wallet\", \"port\": \"3306\", \"write_host\": \"mysql\", \"read_host\": \"mysql\", \"use_ssl\": \"true\"}" --storage-credentials "{\"user\": \"root\", \"pass\" : \"password\"}" \ "${AGENCY_URL}" "${WALLET_KEY}" > vcx-config.json
 
 python3 /usr/share/libvcx/provision_agent_keys.py -v --enterprise-seed "$ENTERPRISE_SEED" --wallet-name $WALLET_NAME  $AGENCY_URL $WALLET_KEY > vcx-config.json
 

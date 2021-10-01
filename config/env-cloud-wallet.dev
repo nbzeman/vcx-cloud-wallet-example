@@ -21,8 +21,13 @@ WEBHOOK=vcx-webhook-response-oob.js
 VERITY_URL=https://vas.pps.evernym.com
 DOMAIN_DID=XGS2Kqt3PGGPgghr1xDxJe
 X_API_KEY=3mvtW1nhPCXNcC3y11BJ77QjXanMMaoL78JGkZ4iLGHh:3H5Tsmtb77N1jz3DBVaUfLyFtArTDFg54xLJJiwNuhvBcW9WesUNEUHUUjR14QWyD85j3DEUnqsbkPgDXJffTfhj
-WALLET_HOST=mysql
+#WALLET_HOST=mysql
+#WALLET_DB_NAME=db
+#WALLET_USERNAME=root
+#WALLET_PASSWORD=password
+
+WALLET_HOST=cloudwalletdbserver.mysql.database.azure.com
 WALLET_DB_NAME=db
-WALLET_USERNAME=root
-WALLET_PASSWORD=password
+WALLET_USERNAME=nbzeman@cloudwalletdbserver
+WALLET_PASSWORD=Superman1972
 WALLET_USE_SSL=false
