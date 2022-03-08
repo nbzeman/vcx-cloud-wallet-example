@@ -33,115 +33,6 @@ async function credentialOffer(credentialMessage){
 }
 
 
-
-// async function webhookResponses() {
-//   // vars for resolves on VAS
-//   var webhookResolve;
-//   var setupResolve;
-//   var schemaResolve;
-//   var credDefResolve;
-//   var relCreateResolve = {};
-//   var relInvitationResolve;
-//   var connectionResolve;
-//   var credOfferResolve;
-
-//   // STEP 2 - Setup Issuer
-//   const setupIssuer =
-//     new Promise(function (resolve, reject) {
-//       setupResolve = resolve
-//       sendVerityRESTMessage('123456789abcdefghi1234', 'issuer-setup', '0.6', 'create', {})
-//     })
-//   const [issuerDid, issuerVerkey] = await setupIssuer
-//   // Automatic registration of DID/Verkey as Endorser using Sovrin SelfServe portal
-//   const sovrinResponse = await registerDid(issuerDid, issuerVerkey)
-//   console.log(`DID registration response from Sovrin SelfServe portal:\n${sovrinResponse.data.body}`)
-
-//   // STEP 3 - Create schema
-//   const schemaMessage = {
-//     name: 'Diploma ' + uuid4().substring(0, 8),
-//     version: '0.1',
-//     attrNames: ['name', 'degree']
-//   }
-//   const schemaCreate =
-//     new Promise(function (resolve, reject) {
-//       schemaResolve = resolve
-//       sendVerityRESTMessage('123456789abcdefghi1234', 'write-schema', '0.6', 'write', schemaMessage)
-//     })
-//   const schemaId = await schemaCreate;
-//   console.log(`Created schema: ${schemaId}`);
-
-//   // STEP 4 - Create credential definition
-//   const credDefMessage = {
-//     name: 'Trinity College Diplomas',
-//     schemaId: schemaId,
-//     tag: 'latest'
-//   }
-//   const credDefCreate =
-//     new Promise(function (resolve, reject) {
-//       credDefResolve = resolve
-//       sendVerityRESTMessage('123456789abcdefghi1234', 'write-cred-def', '0.6', 'write', credDefMessage)
-//     })
-//   const credDefId = await credDefCreate
-//   console.log(`Created credential definition: ${credDefId}`)
-
-//   // STEP 5 - Relationship creation
-//   // create relationship key
-//   const relationshipCreateMessage = {
-//     label: 'Trinity College',
-//     logoUrl: 'https://robohash.org/65G.png'
-//   }
-//   const relationshipCreate =
-//     new Promise(function (resolve, reject) {
-//       relCreateResolve = resolve
-//       sendVerityRESTMessage('123456789abcdefghi1234', 'relationship', '1.0', 'create', relationshipCreateMessage)
-//     })
-//   const [relationshipDid, relThreadId] = await relationshipCreate
-//   // create invitation
-//   const relationshipInvitationMessage = {
-//     '~for_relationship': relationshipDid
-//   }
-//   const relationshipInvitation =
-//     new Promise(function (resolve, reject) {
-//       relInvitationResolve = resolve
-//       sendVerityRESTMessage('123456789abcdefghi1234', 'relationship', '1.0', 'connection-invitation', relationshipInvitationMessage, relThreadId)
-//     })
-//   const inviteUrl = await relationshipInvitation;
-//   console.log(`Invite URL is:\n${inviteUrl}`);
-//   await QR.toFile('qrcode.png', inviteUrl);
-//   // establish connection
-//   console.log('Open file qrcode.png and scan it with ConnectMe app')
-//   const connection =
-//     new Promise(function (resolve, reject) {
-//       connectionResolve = resolve
-//     })
-//   await connection;
-
-//   // STEP 6 - Credential issuance
-//   const credentialData = {
-//     name: 'Joe Smith',
-//     degree: 'Bachelors'
-//   }
-//   const credentialMessage = {
-//     '~for_relationship': relationshipDid,
-//     name: 'Diploma',
-//     cred_def_id: credDefId,
-//     credential_values: credentialData,
-//     price: 0,
-//     comment: 'Diploma',
-//     auto_issue: true
-//   }
-//   const credentialOffer =
-//     new Promise(function (resolve, reject) {
-//       credOfferResolve = resolve
-//       sendVerityRESTMessage('BzCbsNYhMrjHiqZDTUASHg', 'issue-credential', '1.0', 'offer', credentialMessage)
-//     })
-//   await credentialOffer;
-// }
-
-// Run the response code
-// webhookResponses();
-
-
 // create ngrok tunnel
 async function ngrokConnection(port){
   let ngrok_url;
@@ -168,7 +59,7 @@ async function updateWebhookEndpoint(url){
         "pkgType": "plain"
       }
     },
-
+    "authentication":null,
     "@type": "did:sov:123456789abcdefghi1234;spec/configs/0.6/UPDATE_COM_METHOD"
   });
   var config = {
@@ -240,8 +131,14 @@ async function startWebhook(port){
     let message = req.body;
     // insert logic to handle webhook messages
     switch (message['@type']) {
+      case 'did:sov:BzCbsNYhMrjHiqZDTUASHg;spec/committedanswer/1.0/problem-report':
+        console.log('answer problem report');
+        break;
+      case 'did:sov:BzCbsNYhMrjHiqZDTUASHg;spec/committedanswer/1.0/answer-given':
+        console.log('answer was received');
+        break;
       case 'did:sov:123456789abcdefghi1234;spec/configs/0.6/COM_METHOD_UPDATED':
-        // console.log(`The webhook endpoint for this domainDID has been updated');
+        console.log('Webhook updated');
         break;
       case 'did:sov:123456789abcdefghi1234;spec/issuer-setup/0.6/public-identifier-created':
         console.log('Issuer Generated for the domainDID');
@@ -254,6 +151,9 @@ async function startWebhook(port){
         ) {
           await sendVerityRESTMessage('123456789abcdefghi1234', 'issuer-setup', '0.6', 'current-public-identifier', {})
         }
+        break
+      case 'did:sov:BzCbsNYhMrjHiqZDTUASHg;spec/comittedanswer/1.0/problem-report':
+        console.log ('Problem with the Committed Answer has occurred');
         break
       case 'did:sov:123456789abcdefghi1234;spec/issuer-setup/0.6/public-identifier':
         // setupResolve([message.did, message.verKey])

@@ -163,6 +163,23 @@ async function startWebhook(port){
     let message = req.body;
     // insert logic to handle webhook messages
     switch (message['@type']) {
+      case 'did:sov:BzCbsNYhMrjHiqZDTUASHg;spec/issue-credential/1.0/sent':
+        console.log("credential is sent");
+        break;
+      case 'did:sov:123456789abcdefghi1234;spec/write-cred-def/0.6/needs-endorsement':
+        console.log("Prepping above For Endorsement");
+      case 'did:sov:BzCbsNYhMrjHiqZDTUASHg;spec/issue-credential/1.0/problem-report':
+        console.log('credential issue problem report');
+        break;
+      case 'did:sov:BzCbsNYhMrjHiqZDTUASHg;spec/issue-credential/1.0/credential-preview':
+        console.log('credential preview');
+        break;      
+      case 'did:sov:BzCbsNYhMrjHiqZDTUASHg;spec/committedanswer/1.0/problem-report':
+        console.log('answer problem report');
+        break;
+      case 'did:sov:BzCbsNYhMrjHiqZDTUASHg;spec/committedanswer/1.0/answer-given':
+        console.log('answer was received');
+        break;
       case 'did:sov:123456789abcdefghi1234;spec/relationship/1.0/sms-invitation-sent':
         console.log("SMS invitation was sent");
         break

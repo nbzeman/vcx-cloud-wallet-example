@@ -1,0 +1,22 @@
+{
+  "agency_did": "QAxGCiizb9VZNiwZEBJzon",
+  "agency_endpoint": "https://hea001.hs.evernym.com",
+  "agency_verkey": "DdVzquhStrxauGmVTBTDEVfm5q6aSbLsj9CHJQkHUTsy",
+  "author_agreement": "{\"taaDigest\": \"8cee5d7a573e4893b08ff53a0761a22a1607df3b3fcd7e75b98696c92879641f\",\"acceptanceMechanismType\":\"on_file\",\"timeOfAcceptance\": 1635182350}",
+  "genesis_path": "/root/config/genesis.txn",
+  "institution_did": "LANAXZQNgi2F2p8PqT6LoH",
+  "institution_logo_url": "https://s3.us-east-2.amazonaws.com/static.evernym.com/images/icons/cropped-Evernym_favicon-trans-192x192.png",
+  "institution_name": "EV Cloud Wallet",
+  "institution_verkey": "BSjSFrSr4VoWjPz43UCViaifha92BQATidTjCvSroM1Z",
+  "payment_method": "sov",
+  "protocol_type": "3.0",
+  "remote_to_sdk_did": "VCDrvBRDU9muexV8cc3afH",
+  "remote_to_sdk_verkey": "GNFaoCvb3F3ABSzyhqc54qhY8Gbz1kbHuaT6Nbu1XCar",
+  "sdk_to_remote_did": "SJdsCD1RDC2ePFUFMF8Ktp",
+  "sdk_to_remote_verkey": "EnuraxE68JYhYiLU1PcyVSdpMitn34T5dgwKmgMNjyRm",
+  "storage_config": "{}",
+  "storage_credentials": "{}",
+  "wallet_key": "12345",
+  "wallet_name": "LIBVCX_SDK_WALLET",
+  "threadpool_count": "64"
+}
