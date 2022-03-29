@@ -29,11 +29,16 @@ fi
 # Run Provisioning Script
 bash provision_agent.sh &&
 
+
+# npm config set cafile /root/server/certs/avast-root-ca-s1.cer &&
+
 # npm install if package.json exists
 if [ -f "/root/server/package.json" ];then
     npm install --prefix /root/server/ --unsafe-perm &&
     echo 'installed node wrapper package'
 fi
+
+# npm install axios &&
 
 # install and config nginx
 yes | apt-get install nginx &&
