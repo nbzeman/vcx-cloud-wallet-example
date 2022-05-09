@@ -34,7 +34,8 @@ bash provision_agent.sh &&
 
 # npm install if package.json exists
 if [ -f "/root/server/package.json" ];then
-    npm install --prefix /root/server/ --unsafe-perm &&
+    # npm install --prefix /root/server/ --unsafe-perm &&
+    npm install &&
     echo 'installed node wrapper package'
 fi
 

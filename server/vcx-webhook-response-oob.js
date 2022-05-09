@@ -313,5 +313,15 @@ async function startWebhook(port){
     console.log(`Listening on port ${port}`);
   });
 }
+// migration tests from V1 to V2
+
+  async function migrationTesting(){
+
+    // 1. send verifiable answer and verify response
+    // 2. send credential offer and issue
+    // 3. send proof req and verify response
+    
+  }
+
 // run code for webhook
 startWebhook(3000);
