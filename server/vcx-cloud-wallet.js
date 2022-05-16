@@ -66,7 +66,7 @@ async function init(){
   let db = await databaseConnect();
   await createConnectionsTable(db);
 }
-init();
+// init();
 
 // listen for credential offers
 async function credentialOfferListen(){
